@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/startFragment">
+
+    <fragment
+        android:id="@+id/startFragment"
+        android:name="com.example.dailyexpenses.ui.start.StartFragment"
+        android:label="fragment_start"
+        tools:layout="@layout/fragment_start" />
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.example.dailyexpenses.ui.main.MainActivity"
+        android:label="activity_main"
+        tools:layout="@layout/activity_main" >
+        <argument
+            android:name="isSignedIn"
+            app:argType="boolean" />
+    </activity>
+</navigation>

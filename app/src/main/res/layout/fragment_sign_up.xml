@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.main.auth.SignUpFragment">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="120dp"
+        android:text="Регистрация"
+        android:textSize="25sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/etLoginReg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="30dp"
+        android:layout_marginTop="46dp"
+        android:layout_marginEnd="30dp"
+        android:ems="10"
+        android:hint="Логин"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+    <EditText
+        android:id="@+id/etPassReg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:ems="10"
+        android:hint="Пароль"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="@+id/etLoginReg"
+        app:layout_constraintStart_toStartOf="@+id/etLoginReg"
+        app:layout_constraintTop_toBottomOf="@+id/etLoginReg" />
+
+    <EditText
+        android:id="@+id/tePassRegRepeat"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="43dp"
+        android:ems="10"
+        android:hint="Повторить пароль"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="@+id/etPassReg"
+        app:layout_constraintStart_toStartOf="@+id/etPassReg"
+        app:layout_constraintTop_toBottomOf="@+id/etPassReg" />
+
+    <Button
+        android:id="@+id/btnSignUpReg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="55dp"
+        android:text="Зарегистрироваться"
+        app:layout_constraintEnd_toEndOf="@+id/tePassRegRepeat"
+        app:layout_constraintStart_toStartOf="@+id/tePassRegRepeat"
+        app:layout_constraintTop_toBottomOf="@+id/tePassRegRepeat" />
+
+    <Button
+        android:id="@+id/btnSignInReg"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Войти"
+        app:layout_constraintEnd_toEndOf="@+id/btnSignUpReg"
+        app:layout_constraintStart_toStartOf="@+id/btnSignUpReg"
+        app:layout_constraintTop_toBottomOf="@+id/btnSignUpReg" />
+</androidx.constraintlayout.widget.ConstraintLayout>

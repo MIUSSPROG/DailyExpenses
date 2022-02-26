@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@id/dashboard"
+        android:icon="@drawable/ic_dashboard"
+        android:title="Главная" />
+    <item
+        android:id="@id/diagram_graph"
+        android:icon="@drawable/ic_diagram"
+        android:title="Диаграмма" />
+    <item
+        android:id="@id/forecast_graph"
+        android:icon="@drawable/ic_forecast"
+        android:title="Прогноз" />
+    <item
+        android:id="@id/settings_graph"
+        android:icon="@drawable/ic_profile"
+        android:title="Профиль" />
+</menu>

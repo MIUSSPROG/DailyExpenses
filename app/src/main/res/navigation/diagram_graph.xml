@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/diagram_graph"
+    app:startDestination="@id/diagramFragment">
+
+    <fragment
+        android:id="@+id/diagramFragment"
+        android:name="com.example.dailyexpenses.ui.main.tabs.diagram.DiagramFragment"
+        android:label="fragment_diagram"
+        tools:layout="@layout/fragment_diagram" />
+</navigation>
