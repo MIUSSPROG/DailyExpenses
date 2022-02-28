@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
 
 class DashboardViewModel @ViewModelInject constructor(
 //    private val itemToBuyDao: ItemToBuyDao
@@ -20,8 +21,9 @@ class DashboardViewModel @ViewModelInject constructor(
     val itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
 
     fun getItemsToBuy(pickedDate: String){
+        val selectedDateUnix = SimpleDateFormat("dd/M/yyyy").parse(pickedDate).time
         viewModelScope.launch {
-            expensesRepository.getItemToBuyDao().getAllItems(pickedDate).collect {
+            expensesRepository.getItemToBuyDao().getAllItems(selectedDateUnix).collect {
                 itemToBuyLiveData.postValue(it)
             }
         }

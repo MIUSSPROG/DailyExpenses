@@ -17,6 +17,7 @@ import com.example.dailyexpenses.databinding.FragmentDashboardBinding
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.properties.Delegates
 import kotlin.time.days
 
 @AndroidEntryPoint
@@ -25,6 +26,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     private lateinit var binding: FragmentDashboardBinding
     private lateinit var bottomSheet: AddItemToBuyFragment
     private var selectedDate: String? = null
+    private var selectedDateUnix by Delegates.notNull<Long>()
     private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter() }
     private val viewModel: DashboardViewModel by viewModels()
 
@@ -47,7 +49,8 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             }
 
             btnAddDateItem.setOnClickListener{
-                bottomSheet = AddItemToBuyFragment(selectedDate ?: "")
+                selectedDateUnix = SimpleDateFormat("dd/M/yyyy").parse(selectedDate).time
+                bottomSheet = AddItemToBuyFragment(selectedDateUnix ?: 0, selectedDate ?: "")
                 if (!bottomSheet.isAdded){
                     bottomSheet.show(childFragmentManager, "")
                 }

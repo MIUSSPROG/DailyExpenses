@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AddItemToBuyFragment(val dateToBuyItem: String): BottomSheetDialogFragment() {
+class AddItemToBuyFragment(val dateToBuyItemUnix: Long, val dateToBuyItem: String): BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentAddItemToBuyBinding
     private val viewModel: AddItemToBuyViewModel by viewModels()
@@ -44,7 +44,7 @@ class AddItemToBuyFragment(val dateToBuyItem: String): BottomSheetDialogFragment
                 val sumToBuy = etSumToBuy.text.toString()
 
                 if (selectedCategory != "" && plan.isNotBlank() && sumToBuy.isNotBlank()){
-                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = dateToBuyItem, category = selectedCategory, confirm = null)
+                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = dateToBuyItemUnix, category = selectedCategory, confirm = null)
                     viewModel.saveItemToBuy(itemToBuy)
 //                    Toast.makeText(requireContext(), "элемент $itemToBuy успешно сохранен!", Toast.LENGTH_SHORT).show()
                     dismiss()

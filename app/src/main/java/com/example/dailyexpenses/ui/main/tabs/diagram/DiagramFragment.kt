@@ -10,8 +10,15 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Child
+import com.example.dailyexpenses.data.DiagramData
+import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.databinding.FragmentDiagramBinding
 import com.example.dailyexpenses.ui.main.tabs.dashboard.DashboardViewModel
+import com.github.mikephil.charting.data.BarData
+import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -39,7 +46,25 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
 //            Toast.makeText(requireContext(), "ребенок успешно добавлен! result: $result", Toast.LENGTH_SHORT).show()
 //        }
 
+        viewModel.dataForDiagram.observe(viewLifecycleOwner){
+            showBarChart(it)
+        }
+
         return binding.root
+    }
+
+    private fun showBarChart(data: List<DiagramData>){
+        val entries = mutableListOf<BarEntry>()
+        val labels = mutableListOf<String>()
+        data.forEachIndexed { index, diagramData ->
+            entries.add(BarEntry(diagramData.date.toFloat()/10000000, diagramData.sumPrice))
+            labels.add(diagramData.date.toString())
+        }
+
+        val barDataset = BarDataSet(entries, "Cells")
+        val barData = BarData(barDataset)
+        binding.itemsToBuyBarChart.data = barData
+        binding.itemsToBuyBarChart.invalidate()
     }
 
     private fun showDateRange() {
@@ -53,8 +78,11 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
         )
 
         dateRangePicker.addOnPositiveButtonClickListener { datePicked ->
-            val startDate = convertLongToDate(datePicked.first)
-            val secondDate = convertLongToDate(datePicked.second)
+            val firstDateUnix = datePicked.first
+            val secondDateUnix = datePicked.second
+            val startDate = convertLongToDate(firstDateUnix)
+            val secondDate = convertLongToDate(secondDateUnix)
+            viewModel.getDataForDiagram(firstDateUnix, secondDateUnix)
             binding.tvDateRange.text = "$startDate - $secondDate"
         }
     }

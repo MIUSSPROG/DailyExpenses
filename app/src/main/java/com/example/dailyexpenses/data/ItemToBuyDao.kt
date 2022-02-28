@@ -16,8 +16,11 @@ interface ItemToBuyDao {
     suspend fun delete(itemToBuy: ItemToBuy)
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
-    fun getAllItems(pickDate: String): Flow<List<ItemToBuy>>
+    fun getAllItems(pickDate: Long): Flow<List<ItemToBuy>>
 
-//    @Query("SELECT * FROM ItemToBuy WHERE date in ")
-//    fun getAllItemsInRange(fromDate: String, toDate: String): Flow<List<ItemToBuy>>
+//    @Query("SELECT * FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate")
+//    fun getAllItemsInRange(fromDate: Long, toDate: Long): Flow<List<ItemToBuy>>
+
+    @Query("SELECT date, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate GROUP BY date")
+    fun getAllItemsInRange(fromDate: Long, toDate: Long): Flow<List<DiagramData>>
 }
