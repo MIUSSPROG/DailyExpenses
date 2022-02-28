@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dashboard_fragment_graph"
+    app:startDestination="@id/parentDashboardFragment">
+
+    <fragment
+        android:id="@+id/parentDashboardFragment"
+        android:name="com.example.dailyexpenses.ui.main.tabs.parent.ParentDashboardFragment"
+        android:label="fragment_parent_dashboard"
+        tools:layout="@layout/fragment_parent_dashboard" />
+</navigation>

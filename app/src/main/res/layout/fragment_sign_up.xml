@@ -61,7 +61,7 @@
         android:id="@+id/btnSignUpReg"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="155dp"
         android:text="Зарегистрироваться"
         app:layout_constraintEnd_toEndOf="@+id/tePassRegRepeat"
         app:layout_constraintStart_toStartOf="@+id/tePassRegRepeat"
@@ -76,4 +76,25 @@
         app:layout_constraintEnd_toEndOf="@+id/btnSignUpReg"
         app:layout_constraintStart_toStartOf="@+id/btnSignUpReg"
         app:layout_constraintTop_toBottomOf="@+id/btnSignUpReg" />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputRoles"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tePassRegRepeat">
+
+        <AutoCompleteTextView
+            android:id="@+id/dropdownRoles"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            android:text="Роль" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

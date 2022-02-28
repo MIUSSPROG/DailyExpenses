@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profile_parent_graph"
+    app:startDestination="@id/parentProfileFragment">
+
+    <fragment
+        android:id="@+id/parentProfileFragment"
+        android:name="com.example.dailyexpenses.ui.main.tabs.parent.ParentProfileFragment"
+        android:label="fragment_parent_profile"
+        tools:layout="@layout/fragment_parent_profile" />
+</navigation>

@@ -10,5 +10,6 @@ data class ItemToBuy(
     val name: String,
     val category: String,
     val price: Float,
-    val date: String
+    val date: String,
+    val confirm: Boolean?
 )

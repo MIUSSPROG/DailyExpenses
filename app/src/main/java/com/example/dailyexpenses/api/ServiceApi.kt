@@ -4,7 +4,6 @@ import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
-import javax.annotation.PostConstruct
 
 interface ServiceApi {
 
@@ -24,7 +23,7 @@ interface ServiceApi {
     suspend fun getChildren(): Response<List<Child>>
 
     @POST("api/v1/child")
-    suspend fun createChild(): Response<Child>
+    suspend fun createChild(@Body child: Child): Response<Child>
 
     @Multipart
     @POST("api/v1/plan")
@@ -33,8 +32,8 @@ interface ServiceApi {
         @Part("price") price: Float,
         @Part("date") date: String,
         @Part("confirm") confirm: Boolean,
-        @Part("category") category: Int,
-        @Part("child") child: Int,
+        @Part("category") categoryId: Int,
+        @Part("child") childId: Int,
         @Part image: MultipartBody.Part
     ): ResponseBody
 
@@ -46,6 +45,10 @@ interface ServiceApi {
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
 
     companion object{
-        const val BASE_URL = "http://127.0.0.1:8000/"
+//        const val BASE_URL = "http://127.0.0.1:8000/"
+//        const val BASE_URL = "http://10.0.2.2:8000/"
+        const val BASE_URL = "https://daily-expenses.herokuapp.com/"
+//        http://10.0.2.2:8000/api/v1/categories
     }
+
 }

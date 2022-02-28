@@ -2,6 +2,7 @@ package com.example.dailyexpenses.ui.main.auth
 
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -19,6 +20,15 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
         binding = FragmentSignUpBinding.bind(view)
         binding.btnSignUpReg.setOnClickListener { onButtonRegPressed() }
         binding.btnSignInReg.setOnClickListener { onButtonSignInPressed() }
+
+
+        val roles = listOf("родитель", "ребенок")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, roles)
+        binding.dropdownRoles.setAdapter(adapter)
+
+        binding.dropdownRoles.setOnItemClickListener { adapterView, view, position, l ->
+            Toast.makeText(requireContext(), roles[position], Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun onButtonRegPressed(){

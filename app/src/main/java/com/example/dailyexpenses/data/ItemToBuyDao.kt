@@ -17,4 +17,7 @@ interface ItemToBuyDao {
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
     fun getAllItems(pickDate: String): Flow<List<ItemToBuy>>
+
+//    @Query("SELECT * FROM ItemToBuy WHERE date in ")
+//    fun getAllItemsInRange(fromDate: String, toDate: String): Flow<List<ItemToBuy>>
 }

@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.dailyexpenses.R
 import com.example.dailyexpenses.databinding.RvDateItemBinding
 
 class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewHolder>(DiffCallback()) {
@@ -15,6 +16,15 @@ class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewH
                 tvCategory.text = itemToBuy.category
                 tvDateItem.text = itemToBuy.name
                 tvDateItemPrice.text = itemToBuy.price.toString()
+                if (itemToBuy.confirm == true) {
+                    imgvConfirmStatus.setImageResource(R.drawable.ic_done)
+                }
+                else if (itemToBuy.confirm == false){
+                    imgvConfirmStatus.setImageResource(R.drawable.ic_cancel)
+                }
+                else{
+                    imgvConfirmStatus.setImageDrawable(null)
+                }
             }
         }
     }

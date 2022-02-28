@@ -44,7 +44,7 @@ class AddItemToBuyFragment(val dateToBuyItem: String): BottomSheetDialogFragment
                 val sumToBuy = etSumToBuy.text.toString()
 
                 if (selectedCategory != "" && plan.isNotBlank() && sumToBuy.isNotBlank()){
-                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = dateToBuyItem, category = selectedCategory)
+                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = dateToBuyItem, category = selectedCategory, confirm = null)
                     viewModel.saveItemToBuy(itemToBuy)
 //                    Toast.makeText(requireContext(), "элемент $itemToBuy успешно сохранен!", Toast.LENGTH_SHORT).show()
                     dismiss()

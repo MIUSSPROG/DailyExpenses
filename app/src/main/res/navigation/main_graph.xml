@@ -18,6 +18,9 @@
             app:destination="@id/tabsFragment"
             app:popUpTo="@id/signInFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_signInFragment_to_tabsParentFragment"
+            app:destination="@id/tabsParentFragment" />
     </fragment>
     <fragment
         android:id="@+id/signUpFragment"
@@ -29,4 +32,9 @@
         android:name="com.example.dailyexpenses.ui.main.tabs.TabsFragment"
         android:label="fragment_tabs"
         tools:layout="@layout/fragment_tabs" />
+    <fragment
+        android:id="@+id/tabsParentFragment"
+        android:name="com.example.dailyexpenses.ui.main.tabs.parent.TabsParentFragment"
+        android:label="fragment_parent_tabs"
+        tools:layout="@layout/fragment_parent_tabs" />
 </navigation>

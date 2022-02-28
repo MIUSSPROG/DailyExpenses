@@ -54,4 +54,13 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvDateItem" />
+
+    <ImageView
+        android:id="@+id/imgvConfirmStatus"
+        android:layout_width="62dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/tvDateItemPrice"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_done" />
 </androidx.constraintlayout.widget.ConstraintLayout>
