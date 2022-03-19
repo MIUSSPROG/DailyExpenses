@@ -41,6 +41,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         binding.btnLogout.setOnClickListener {
             prefs.isSignedIn = false
+            prefs.login = ""
+            prefs.pass = ""
+            prefs.role = ""
             findTopNavController().navigate(R.id.signInFragment, null, navOptions {
                 popUpTo(R.id.tabsFragment){
                     inclusive = true

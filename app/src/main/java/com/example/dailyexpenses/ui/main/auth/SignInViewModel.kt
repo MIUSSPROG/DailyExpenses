@@ -17,14 +17,14 @@ class SignInViewModel @ViewModelInject constructor(
 ) : ViewModel() {
 
     val childToCheck = MutableLiveData<Child?>()
+    val parentToCheck = MutableLiveData<Parent?>()
 
     fun checkChild(child: Child) {
         viewModelScope.launch {
             val res = expensesRepository.getRemoteDataSource().checkChild(child)
             if (res.isSuccessful) {
                 childToCheck.postValue(res.body())
-            }
-            else{
+            } else {
                 Log.d("Error", res.errorBody().toString())
                 childToCheck.postValue(null)
             }
@@ -33,7 +33,13 @@ class SignInViewModel @ViewModelInject constructor(
 
     fun checkParent(parent: Parent) {
         viewModelScope.launch {
-//            expensesRepository.getRemoteDataSource().createChild(parent)
+            val res = expensesRepository.getRemoteDataSource().checkParent(parent)
+            if (res.isSuccessful) {
+                parentToCheck.postValue(res.body())
+            } else {
+                Log.d("Error", res.errorBody().toString())
+                parentToCheck.postValue(null)
+            }
         }
     }
 }

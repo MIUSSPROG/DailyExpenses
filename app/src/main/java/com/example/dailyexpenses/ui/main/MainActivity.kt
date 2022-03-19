@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 //        setSupportActionBar(binding.toolbar)
 
         val navController = getRootNavController()
-        prepareRootNavController(isSignedIn(),"child", navController)
+        prepareRootNavController(isSignedIn(), prefs.role, navController)
         onNavControllerActivated(navController)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     private fun prepareRootNavController(isSignedIn: Boolean, role: String, navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
         graph.setStartDestination( if (isSignedIn) {
-            if (role == "parent"){
+            if (role == "родитель"){
                 getParentTabsDestination()
             }
             else {

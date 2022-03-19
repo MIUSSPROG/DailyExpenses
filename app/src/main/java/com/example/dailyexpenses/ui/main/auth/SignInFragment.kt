@@ -7,10 +7,14 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
+import at.favre.lib.crypto.bcrypt.BCrypt
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Child
+import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.databinding.FragmentSignInBinding
+import com.example.dailyexpenses.utils.Hasher
 import com.example.dailyexpensespredprof.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.log
@@ -30,30 +34,70 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
 
     }
 
-    private fun onSignInButtonPressed(){
+    private fun onSignInButtonPressed() {
         binding.apply {
             val login = etLogin.text.toString()
             val pass = etPassword.text.toString()
-            if (login.isNotBlank() && pass.isNotBlank()){
-                if (login == prefs.login && pass == prefs.pass){
+            var isParent = true
+            var isChild = true
+//            val passHash = BCrypt.withDefaults().hashToString(12, pass.toCharArray())
+            val passHash = Hasher.getSecurePassword(pass)
+            if (login.isNotBlank() && pass.isNotBlank()) {
+                if (login == prefs.login && pass == prefs.pass) {
                     prefs.isSignedIn = true
                     val direction = SignInFragmentDirections.actionSignInFragmentToTabsFragment()
                     findNavController().navigate(direction)
-                }
-                else{
-                    viewModel.checkChild(Child(login = login, password = pass))
-                    viewModel.childToCheck.observe(viewLifecycleOwner){
-                        it ?: Toast.makeText(requireContext(), "Пользователь не найден", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.checkChild(Child(login = login, password = passHash!!))
+                    viewModel.checkParent(Parent(login = login, password = passHash!!))
+
+                    viewModel.childToCheck.observe(viewLifecycleOwner) { child ->
+                        if (child == null) {
+                            isChild = false
+                        }else {
+                            saveInfoAndDirect("ученик", login, pass)
+                        }
                     }
+
+                    viewModel.parentToCheck.observe(viewLifecycleOwner){ parent ->
+                        if (parent == null) {
+                            isParent = false
+                        }else {
+                            saveInfoAndDirect("родитель", login, pass)
+                        }
+
+                        if (!isParent && !isChild){
+                            Toast.makeText(requireContext(), "Пользователь не найден", Toast.LENGTH_SHORT).show()
+                        }
+
+                    }
+
                 }
-            }
-            else{
+            } else {
                 Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun onSignUpButtonPressed(){
+    private fun saveInfoAndDirect(role: String, login: String, pass: String){
+        prefs.isSignedIn = true
+        prefs.login = login
+        prefs.pass = pass
+        prefs.role = role
+
+        val direction = when(role){
+            "ученик" -> SignInFragmentDirections.actionSignInFragmentToTabsFragment()
+            "родитель" -> SignInFragmentDirections.actionSignInFragmentToTabsParentFragment()
+            else -> null
+        }
+        if (direction != null) {
+            findNavController().navigate(direction)
+        }else{
+            Toast.makeText(requireContext(), "Ошибка навигации", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun onSignUpButtonPressed() {
         val direction = SignInFragmentDirections.actionSignInFragmentToSignUpFragment()
         findNavController().navigate(direction)
     }
