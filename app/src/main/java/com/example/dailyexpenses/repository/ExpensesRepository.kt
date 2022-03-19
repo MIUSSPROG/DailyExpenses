@@ -13,5 +13,4 @@ class ExpensesRepository @Inject constructor(
     fun getRemoteDataSource() = remoteDataSource
 
     fun getItemToBuyDao() = itemToBuyDao
-
 }

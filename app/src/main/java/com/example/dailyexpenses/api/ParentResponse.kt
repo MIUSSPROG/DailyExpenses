@@ -4,7 +4,11 @@ data class Parent(
     val id: Int=0,
     val login: String,
     val password: String
-    )
+    ){
+    override fun toString(): String {
+        return login
+    }
+}
 
 data class ParentChildren(
     val login: String,

@@ -50,7 +50,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
             btnAddDateItem.setOnClickListener{
                 selectedDateUnix = SimpleDateFormat("dd/M/yyyy").parse(selectedDate).time
-                bottomSheet = AddItemToBuyFragment(selectedDateUnix ?: 0, selectedDate ?: "")
+                bottomSheet = AddItemToBuyFragment(selectedDateUnix, selectedDate ?: "")
                 if (!bottomSheet.isAdded){
                     bottomSheet.show(childFragmentManager, "")
                 }

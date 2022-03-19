@@ -58,12 +58,13 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
         val labels = mutableListOf<String>()
         data.forEachIndexed { index, diagramData ->
             entries.add(BarEntry(diagramData.date.toFloat()/10000000, diagramData.sumPrice))
-            labels.add(diagramData.date.toString())
+            labels.add(convertLongToDate(diagramData.date.toLong()))
         }
 
         val barDataset = BarDataSet(entries, "Cells")
         val barData = BarData(barDataset)
         binding.itemsToBuyBarChart.data = barData
+        binding.itemsToBuyBarChart.animateY(1000)
         binding.itemsToBuyBarChart.invalidate()
     }
 

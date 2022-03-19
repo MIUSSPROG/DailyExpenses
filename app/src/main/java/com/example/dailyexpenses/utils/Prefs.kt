@@ -11,6 +11,7 @@ class Prefs(context: Context) {
         private const val KEY_SIGNED_IN = "isSignedIn"
         private const val KEY_LOGIN = "login"
         private const val KEY_PASS = "pass"
+        private const val KEY_ROLE = "role"
     }
 
     private val sharedPref: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, Context.MODE_PRIVATE)
@@ -26,5 +27,9 @@ class Prefs(context: Context) {
     var pass: String
         get() = sharedPref.getString(KEY_PASS, "") ?: ""
         set(value) = sharedPref.edit { putString(KEY_PASS, value) }
+
+    var role: String
+        get() = sharedPref.getString(KEY_ROLE, "") ?: ""
+        set(value) = sharedPref.edit { putString(KEY_ROLE, value) }
 
 }

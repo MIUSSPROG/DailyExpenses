@@ -1,4 +1,39 @@
 package com.example.dailyexpenses.ui.main.auth
 
-class SignInViewModel {
+import android.util.Log
+import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.dailyexpenses.api.Child
+import com.example.dailyexpenses.api.Parent
+import com.example.dailyexpenses.data.ItemToBuy
+import com.example.dailyexpenses.repository.ExpensesRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+
+class SignInViewModel @ViewModelInject constructor(
+    private val expensesRepository: ExpensesRepository
+) : ViewModel() {
+
+    val childToCheck = MutableLiveData<Child?>()
+
+    fun checkChild(child: Child) {
+        viewModelScope.launch {
+            val res = expensesRepository.getRemoteDataSource().checkChild(child)
+            if (res.isSuccessful) {
+                childToCheck.postValue(res.body())
+            }
+            else{
+                Log.d("Error", res.errorBody().toString())
+                childToCheck.postValue(null)
+            }
+        }
+    }
+
+    fun checkParent(parent: Parent) {
+        viewModelScope.launch {
+//            expensesRepository.getRemoteDataSource().createChild(parent)
+        }
+    }
 }

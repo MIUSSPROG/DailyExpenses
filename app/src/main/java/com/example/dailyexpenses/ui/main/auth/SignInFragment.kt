@@ -1,19 +1,25 @@
 package com.example.dailyexpenses.ui.main.auth
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import com.example.dailyexpenses.R
+import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.databinding.FragmentSignInBinding
 import com.example.dailyexpensespredprof.utils.prefs
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.log
 
+@AndroidEntryPoint
 class SignInFragment : Fragment(R.layout.fragment_sign_in) {
 
     private lateinit var binding: FragmentSignInBinding
+    private val viewModel: SignInViewModel by viewModels()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,7 +41,10 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                     findNavController().navigate(direction)
                 }
                 else{
-                    Toast.makeText(requireContext(), "Пользователь не зарегистрирован!", Toast.LENGTH_SHORT).show()
+                    viewModel.checkChild(Child(login = login, password = pass))
+                    viewModel.childToCheck.observe(viewLifecycleOwner){
+                        it ?: Toast.makeText(requireContext(), "Пользователь не найден", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
             else{

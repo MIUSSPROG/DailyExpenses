@@ -5,8 +5,9 @@ import com.google.gson.annotations.SerializedName
 data class Child(
     val id: Int=0,
     val login: String,
+    val password: String,
     @SerializedName("parent")
-    val parentId: Int
+    val parentId: Int? = null
     )
 
 //data class ChildPost(

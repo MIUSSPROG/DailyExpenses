@@ -4,6 +4,7 @@ import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.api.Plan
 import com.example.dailyexpenses.api.ServiceApi
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import retrofit2.Retrofit
 import javax.inject.Inject
@@ -21,6 +22,12 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
     suspend fun getChildren() = serviceApi.getChildren()
 
     suspend fun createChild(child: Child) = serviceApi.createChild(child)
+
+    suspend fun createChildEncoded(child: Child) = serviceApi.saveChildEncoded(child)
+
+    suspend fun checkChild(child: Child) = serviceApi.checkChild(child.login, child.password)
+
+    suspend fun checkParent(parent: Parent) = serviceApi.checkParent(parent.login, parent.password)
 
     suspend fun createPlan(
         name: String,

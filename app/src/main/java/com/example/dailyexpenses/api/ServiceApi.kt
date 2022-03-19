@@ -1,6 +1,8 @@
 package com.example.dailyexpenses.api
 
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -25,6 +27,21 @@ interface ServiceApi {
     @POST("api/v1/child")
     suspend fun createChild(@Body child: Child): Response<Child>
 
+    @POST("api/v1/save_child_encoded/")
+    suspend fun saveChildEncoded(@Body child: Child): ResponseBody
+
+    @GET("api/v1/check_child/")
+    suspend fun checkChild(
+        @Query("login") login: String,
+        @Query("password") password: String
+    ): Response<Child?>
+
+    @GET("api/v1/check_parent")
+    suspend fun checkParent(
+        @Query("login") login: String,
+        @Query("password") password: String
+    ): Response<Parent?>
+
     @Multipart
     @POST("api/v1/plan")
     suspend fun createPlan(
@@ -44,8 +61,10 @@ interface ServiceApi {
     @PATCH("api/v1/plan/{id}/confirm")
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
 
-    companion object{
-//        const val BASE_URL = "http://127.0.0.1:8000/"
+    suspend fun getRole()
+
+    companion object {
+        //        const val BASE_URL = "http://127.0.0.1:8000/"
 //        const val BASE_URL = "http://10.0.2.2:8000/"
         const val BASE_URL = "https://daily-expenses.herokuapp.com/"
 //        http://10.0.2.2:8000/api/v1/categories

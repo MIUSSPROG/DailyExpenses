@@ -1,5 +1,4 @@
 package com.example.dailyexpenses.data
-
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import java.util.*

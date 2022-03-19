@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun prepareRootNavController(isSignedIn: Boolean, role: String, navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
-        graph.startDestination = if (isSignedIn) {
+        graph.setStartDestination( if (isSignedIn) {
             if (role == "parent"){
                 getParentTabsDestination()
             }
@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
             }
         } else {
             getSignInDestination()
-        }
+        })
         navController.graph = graph
     }
 
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
     private fun isStartDestination(destination: NavDestination?): Boolean {
         if (destination == null) return false
         val graph = destination.parent ?: return false
-        val startDestinations = topLevelDestinations + graph.startDestination
+        val startDestinations = topLevelDestinations + graph.startDestinationId
         return startDestinations.contains(destination.id)
     }
 
