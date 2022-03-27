@@ -67,6 +67,15 @@ interface ServiceApi {
     @POST("api/v1/send_invitation")
     suspend fun sendInvitation(@Body invitation: Invitation): Response<Invitation>
 
+    @GET("api/v1/children_by_parentId")
+    suspend fun getChildrenInvitations(@Query("parentId") parentId: Int): Response<List<ChildOfParent>>
+
+    @GET("api/v1/get_invitation_id")
+    suspend fun getInvitationId(@Query("childId") childId: Int, @Query("parentId") parentId: Int): Response<Invitation>
+
+    @PATCH("api/v1/confirm_invitation/{id}")
+    suspend fun confirmInvitation(@Path("id") id: Int, @Body invitation: Invitation): ResponseBody
+
     companion object {
         //        const val BASE_URL = "http://127.0.0.1:8000/"
 //        const val BASE_URL = "http://10.0.2.2:8000/"
