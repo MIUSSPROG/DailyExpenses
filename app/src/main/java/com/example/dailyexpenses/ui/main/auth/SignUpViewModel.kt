@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.repository.ExpensesRepository
+import com.example.dailyexpenses.repository.FirebaseRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -20,12 +21,14 @@ class SignUpViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             expensesRepository.getRemoteDataSource().createChildEncoded(child)
         }
+        FirebaseRepository.saveToken(child.login)
     }
 
     fun createParent(parent: Parent){
         viewModelScope.launch {
-            expensesRepository.getRemoteDataSource().createParent(parent)
+            expensesRepository.getRemoteDataSource().createParentEncoded(parent)
         }
+        FirebaseRepository.saveToken(parent.login)
     }
 
 

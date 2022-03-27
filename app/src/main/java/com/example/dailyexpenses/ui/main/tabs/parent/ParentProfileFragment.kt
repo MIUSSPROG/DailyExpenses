@@ -18,6 +18,8 @@ class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {
 
         binding = FragmentParentProfileBinding.bind(view)
 
+        binding.tvParentLogin.text = prefs.login
+
         binding.btnParentLogout.setOnClickListener {
             prefs.isSignedIn = false
             prefs.login = ""

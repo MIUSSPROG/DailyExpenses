@@ -6,6 +6,7 @@
         <entry key="app/src/main/res/drawable/expandable_border.xml" value="0.2" />
         <entry key="app/src/main/res/drawable/ic_diagram.xml" value="0.211" />
         <entry key="app/src/main/res/drawable/ic_done.xml" value="0.1915" />
+        <entry key="app/src/main/res/drawable/ic_notification.xml" value="0.134" />
         <entry key="app/src/main/res/drawable/ic_profile.xml" value="0.2035" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20774078369140625" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.41041666666666665" />
@@ -16,7 +17,7 @@
         <entry key="app/src/main/res/layout/fragment_parent_dashboard.xml" value="0.3365275065104167" />
         <entry key="app/src/main/res/layout/fragment_parent_profile.xml" value="0.2727625528971354" />
         <entry key="app/src/main/res/layout/fragment_parent_tabs.xml" value="0.2881540934244792" />
-        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.335" />
+        <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.28003021240234377" />
         <entry key="app/src/main/res/layout/fragment_sign_in.xml" value="0.35520833333333335" />
         <entry key="app/src/main/res/layout/fragment_sign_up.xml" value="0.3354192097981771" />
         <entry key="app/src/main/res/layout/fragment_start.xml" value="0.2089808146158854" />
@@ -25,6 +26,7 @@
         <entry key="app/src/main/res/layout/rv_date_item.xml" value="0.31025641025641026" />
         <entry key="app/src/main/res/layout/rv_item_child.xml" value="0.3572586059570313" />
         <entry key="app/src/main/res/layout/rv_item_child_plan.xml" value="0.4088541666666667" />
+        <entry key="app/src/main/res/layout/rv_item_children.xml" value="0.3175925925925926" />
         <entry key="app/src/main/res/menu/tabs_menu.xml" value="0.3409250895182292" />
         <entry key="app/src/main/res/menu/tabs_parent_menu.xml" value="0.4244791666666667" />
       </map>

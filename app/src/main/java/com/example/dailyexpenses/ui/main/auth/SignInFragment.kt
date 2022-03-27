@@ -35,6 +35,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
     }
 
     private fun onSignInButtonPressed() {
+
         binding.apply {
             val login = etLogin.text.toString()
             val pass = etPassword.text.toString()
@@ -55,7 +56,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                         if (child == null) {
                             isChild = false
                         }else {
-                            saveInfoAndDirect("ученик", login, pass)
+                            saveInfoAndDirect("ученик", login, pass, child.id)
                         }
                     }
 
@@ -63,7 +64,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
                         if (parent == null) {
                             isParent = false
                         }else {
-                            saveInfoAndDirect("родитель", login, pass)
+                            saveInfoAndDirect("родитель", login, pass, parent.id)
                         }
 
                         if (!isParent && !isChild){
@@ -79,11 +80,12 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
         }
     }
 
-    private fun saveInfoAndDirect(role: String, login: String, pass: String){
+    private fun saveInfoAndDirect(role: String, login: String, pass: String, id: Int){
         prefs.isSignedIn = true
         prefs.login = login
         prefs.pass = pass
         prefs.role = role
+        prefs.id = id
 
         val direction = when(role){
             "ученик" -> SignInFragmentDirections.actionSignInFragmentToTabsFragment()

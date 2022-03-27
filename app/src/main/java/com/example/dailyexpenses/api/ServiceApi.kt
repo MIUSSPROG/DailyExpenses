@@ -18,6 +18,9 @@ interface ServiceApi {
     @POST("api/v1/parent")
     suspend fun createParent(@Body parentPost: Parent): Response<Parent>
 
+    @POST("api/v1/save_parent_encoded/")
+    suspend fun saveParentEncoded(@Body parentPost: Parent): ResponseBody
+
     @GET("api/v1/parent/{id}/children")
     suspend fun getParentChildren(@Path("id") id: Int): Response<ParentChildren>
 
@@ -61,7 +64,8 @@ interface ServiceApi {
     @PATCH("api/v1/plan/{id}/confirm")
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
 
-    suspend fun getRole()
+    @POST("api/v1/send_invitation")
+    suspend fun sendInvitation(@Body invitation: Invitation): Response<Invitation>
 
     companion object {
         //        const val BASE_URL = "http://127.0.0.1:8000/"

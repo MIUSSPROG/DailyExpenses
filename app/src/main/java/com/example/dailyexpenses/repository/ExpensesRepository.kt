@@ -7,10 +7,13 @@ import javax.inject.Singleton
 @Singleton
 class ExpensesRepository @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
-    private val itemToBuyDao: ItemToBuyDao
+    private val itemToBuyDao: ItemToBuyDao,
+    private val firebaseDataSource: FirebaseDataSource
 ) {
 
     fun getRemoteDataSource() = remoteDataSource
 
     fun getItemToBuyDao() = itemToBuyDao
+
+    fun getFirebaseDataSource() = firebaseDataSource
 }

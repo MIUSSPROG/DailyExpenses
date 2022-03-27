@@ -2,6 +2,7 @@ package com.example.dailyexpenses.di
 
 import android.app.Application
 import androidx.room.Room
+import com.example.dailyexpenses.api.FirebaseCloudMessagingApi
 import com.example.dailyexpenses.api.ServiceApi
 import com.example.dailyexpenses.data.ItemToBuyDatabase
 import dagger.Module
@@ -14,6 +15,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -37,6 +39,7 @@ object AppModule {
 
     @Provides
     @Singleton
+    @Named("dailyExpenses")
     fun provideRetrofit(): Retrofit {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -53,6 +56,28 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideServiceApi(retrofit: Retrofit): ServiceApi =
+    @Named("fcm")
+    fun provideRetrofitFcm(): Retrofit{
+        val httpLoggingInterceptor = HttpLoggingInterceptor()
+        httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
+        val builder = OkHttpClient.Builder()
+        builder.networkInterceptors().add(httpLoggingInterceptor)
+        val okHttpClient = builder.build()
+
+        return Retrofit.Builder()
+            .baseUrl(FirebaseCloudMessagingApi.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideServiceApi(@Named("dailyExpenses") retrofit: Retrofit): ServiceApi =
         retrofit.create(ServiceApi::class.java)
+
+    @Provides
+    @Singleton
+    fun provideFcmApi(@Named("fcm") retrofit: Retrofit): FirebaseCloudMessagingApi =
+        retrofit.create(FirebaseCloudMessagingApi::class.java)
 }

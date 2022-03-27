@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navOptions
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Parent
@@ -17,17 +19,19 @@ import com.example.dailyexpenses.ui.main.tabs.dashboard.DashboardViewModel
 import com.example.dailyexpenses.utils.findTopNavController
 import com.example.dailyexpensespredprof.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
+import retrofit2.http.HTTP
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
     private lateinit var binding: FragmentProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
+    private var selectedParent: Parent? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentProfileBinding.bind(view)
-
+        binding.tvLogin.text = prefs.login
 
         viewModel.getParents()
 
@@ -36,19 +40,44 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             binding.autoEtParentUsername.apply {
                 setAdapter(adapter)
                 threshold = 2
+                setOnItemClickListener { adapterView, view, pos, id ->
+                    selectedParent = adapter.getItem(pos)
+                }
+            }
+        }
+
+        binding.btnSendInvitationToParent.setOnClickListener {
+            selectedParent?.let { parent -> viewModel.sendInvitation(parent) }
+            viewModel.fcmLiveData.observe(viewLifecycleOwner){
+                if (it.success == 1){
+                    Toast.makeText(requireContext(), "Приглашение успешно отправлено!", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            viewModel.errorInvitation.observe(viewLifecycleOwner){ errorResponse ->
+                when (errorResponse.code()){
+                    400 -> Toast.makeText(requireContext(), "Приглашение $selectedParent уже было отправлено!" , Toast.LENGTH_SHORT).show()
+                    404, 500 -> Toast.makeText(requireContext(), "Ошибка на стороне сервера!" , Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
         binding.btnLogout.setOnClickListener {
-            prefs.isSignedIn = false
-            prefs.login = ""
-            prefs.pass = ""
-            prefs.role = ""
+            resetPrefs()
             findTopNavController().navigate(R.id.signInFragment, null, navOptions {
                 popUpTo(R.id.tabsFragment){
                     inclusive = true
                 }
             })
         }
+
+    }
+
+    private fun resetPrefs(){
+        prefs.isSignedIn = false
+        prefs.login = ""
+        prefs.pass = ""
+        prefs.role = ""
+        prefs.id = 0
     }
 }

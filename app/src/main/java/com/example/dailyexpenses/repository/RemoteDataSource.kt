@@ -1,9 +1,6 @@
 package com.example.dailyexpenses.repository
 
-import com.example.dailyexpenses.api.Child
-import com.example.dailyexpenses.api.Parent
-import com.example.dailyexpenses.api.Plan
-import com.example.dailyexpenses.api.ServiceApi
+import com.example.dailyexpenses.api.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import retrofit2.Retrofit
@@ -16,6 +13,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
     suspend fun getParents() = serviceApi.getParents()
 
     suspend fun createParent(parentPost: Parent) = serviceApi.createParent(parentPost)
+
+    suspend fun createParentEncoded(parentPost: Parent) = serviceApi.saveParentEncoded(parentPost)
 
     suspend fun getParentChildren(id: Int) = serviceApi.getParentChildren(id)
 
@@ -42,4 +41,6 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
     suspend fun getChildrenPlan(id: Int) = serviceApi.getChildrenPlan(id)
 
     suspend fun confirmPlan(id: Int, plan: Plan) = serviceApi.confirmPlan(id, plan)
+
+    suspend fun sendInvitation(invitation: Invitation) = serviceApi.sendInvitation(invitation)
 }
