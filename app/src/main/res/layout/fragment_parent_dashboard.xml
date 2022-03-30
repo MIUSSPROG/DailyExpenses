@@ -6,29 +6,38 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.main.tabs.parent.ParentDashboardFragment">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChildren"
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/ChildrenInputLayout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="0dp"
-        android:layout_height="250dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginEnd="20dp"
+        android:hint="Выберите ребенка"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/rv_item_child" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <AutoCompleteTextView
+            android:id="@+id/actvChildrenToChoose"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/allerta" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnChoosePeriod"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="55dp"
         android:layout_marginEnd="25dp"
         android:text="Задать период"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/rvChildren" />
+        app:layout_constraintTop_toBottomOf="@+id/ChildrenInputLayout" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvChildPlans"

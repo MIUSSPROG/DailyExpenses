@@ -47,17 +47,30 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         }
 
         binding.btnSendInvitationToParent.setOnClickListener {
-            selectedParent?.let { parent -> viewModel.sendInvitation(parent) }
-            viewModel.fcmLiveData.observe(viewLifecycleOwner){
-                if (it.success == 1){
-                    Toast.makeText(requireContext(), "Приглашение успешно отправлено!", Toast.LENGTH_SHORT).show()
+            binding.autoEtParentUsername.setText("")
+            viewModel.checkInvitationLiveData.observe(viewLifecycleOwner){ code ->
+                if (code == 200){
+                    Toast.makeText(requireContext(), "Приглашение $selectedParent уже было отправлено", Toast.LENGTH_SHORT).show()
+                }
+            }
+            if (selectedParent == null){
+                val parentLoginToCheck = binding.autoEtParentUsername.text.toString()
+                viewModel.checkParent(parentLoginToCheck)
+            }else{
+                viewModel.sendInvitation(selectedParent!!)
+            }
+
+            viewModel.checkParentLiveData.observe(viewLifecycleOwner){ parent ->
+                if (parent == null){
+                    Toast.makeText(requireContext(), "такого родителя не существует", Toast.LENGTH_SHORT).show()
+                } else{
+                    viewModel.sendInvitation(parent)
                 }
             }
 
-            viewModel.errorInvitation.observe(viewLifecycleOwner){ errorResponse ->
-                when (errorResponse.code()){
-                    400 -> Toast.makeText(requireContext(), "Приглашение $selectedParent уже было отправлено!" , Toast.LENGTH_SHORT).show()
-                    404, 500 -> Toast.makeText(requireContext(), "Ошибка на стороне сервера!" , Toast.LENGTH_SHORT).show()
+            viewModel.fcmLiveData.observe(viewLifecycleOwner){
+                if (it.success == 1){
+                    Toast.makeText(requireContext(), "Приглашение успешно отправлено!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
