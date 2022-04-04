@@ -39,27 +39,80 @@
         app:layout_constraintTop_toTopOf="@+id/tvLogin"
         app:srcCompat="@drawable/ic_exit" />
 
-    <AutoCompleteTextView
-        android:id="@+id/auto_et_parent_username"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/seachParentConstraintLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/btnLogout"
+        app:layout_constraintStart_toStartOf="@+id/textView4"
+        app:layout_constraintTop_toBottomOf="@+id/btnLogout">
+
+        <AutoCompleteTextView
+            android:id="@+id/auto_et_parent_username"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:ems="10"
+            android:hint="Введите Login родителя"
+            android:inputType="textPersonName"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <Button
+            android:id="@+id/btnSendInvitationToParent"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="Отправить приглашение"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/auto_et_parent_username" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/attachedParentConstraintLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="50dp"
-        android:layout_marginEnd="30dp"
-        android:ems="10"
-        android:hint="Введите Login родителя"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="@+id/btnLogout"
         app:layout_constraintStart_toStartOf="@+id/textView4"
-        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+        app:layout_constraintTop_toBottomOf="@+id/seachParentConstraintLayout">
 
-    <Button
-        android:id="@+id/btnSendInvitationToParent"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:text="Отправить приглашение"
-        app:layout_constraintEnd_toEndOf="@+id/auto_et_parent_username"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="@+id/auto_et_parent_username"
-        app:layout_constraintTop_toBottomOf="@+id/auto_et_parent_username" />
+        <TextView
+            android:id="@+id/tvParentAttached"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="20dp"
+            android:text="Иванов Иван Иванович"
+            android:textSize="22sp"
+            app:layout_constraintBottom_toBottomOf="@+id/btnUnpinParent"
+            app:layout_constraintEnd_toStartOf="@+id/btnUnpinParent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/btnUnpinParent" />
+
+        <ImageView
+            android:id="@+id/btnUnpinParent"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/ic_cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textView7" />
+
+        <TextView
+            android:id="@+id/textView7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Родители"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

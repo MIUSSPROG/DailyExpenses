@@ -35,7 +35,6 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
         binding.dropdownRoles.setAdapter(adapter)
 
         binding.dropdownRoles.setOnItemClickListener { adapterView, view, position, l ->
-//            Toast.makeText(requireContext(), roles[position], Toast.LENGTH_SHORT).show()
             selectedRole = roles[position]
         }
     }
@@ -45,8 +44,7 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
             if (etLoginReg.text.isNotBlank() && etPassReg.text.isNotBlank()){
                 val loginToSave = etLoginReg.text.toString()
                 val passwordToSave = etPassReg.text.toString()
-//                prefs.login = loginToSave
-//                prefs.pass = passwordToSave
+
                 if (selectedRole == "ребенок") {
                     val child = Child(login = loginToSave, password = passwordToSave)
                     viewModel.createChild(child)

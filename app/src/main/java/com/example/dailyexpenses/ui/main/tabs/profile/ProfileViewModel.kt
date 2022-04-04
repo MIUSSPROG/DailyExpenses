@@ -9,12 +9,14 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.api.*
 import com.example.dailyexpenses.repository.ExpensesRepository
+import com.example.dailyexpenses.utils.Constants
 import com.example.dailyexpensespredprof.utils.prefs
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
@@ -25,16 +27,20 @@ class ProfileViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
 
-//    val parents = expensesRepository.getRemoteDataSource().getParents().asLiveData()
     val parentsLiveData = MutableLiveData<List<Parent>>()
     val fcmLiveData = MutableLiveData<FcmResponse>()
     val checkInvitationLiveData = MutableLiveData<Int>()
     val checkParentLiveData = MutableLiveData<Parent?>()
+    val checkChildParentLiveData = MutableLiveData<ChildParent>()
+    val cancelInvitationLiveData = MutableLiveData<Child>()
+//    val cancelInvitationStateFlow = MutableStateFlow<Child?>(null)
 
     fun getParents(){
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().getParents()
-            parentsLiveData.postValue(response.body())
+            if (response.isSuccessful && response.body() != null){
+                parentsLiveData.postValue(response.body())
+            }
         }
     }
 
@@ -50,8 +56,27 @@ class ProfileViewModel @ViewModelInject constructor(
         }
     }
 
+    fun checkChildParent(login: String){
+        viewModelScope.launch {
+            val response = expensesRepository.getRemoteDataSource().checkChildParent(login)
+            if (response.isSuccessful && response.body() != null){
+                checkChildParentLiveData.postValue(response.body())
+            }
+        }
+    }
+
     suspend fun checkInvitation(parentId: Int): Response<Child> {
         return expensesRepository.getRemoteDataSource().checkInvitation(parentId, prefs.login)
+    }
+
+    fun cancelInvitation(){
+        viewModelScope.launch {
+            val response = expensesRepository.getRemoteDataSource().cancelInvitation(prefs.id, ChildInvitation(parent = Constants.WITHOUT_PARENT, confirmed = false))
+            if (response.isSuccessful && response.body() != null) {
+                cancelInvitationLiveData.postValue(response.body())
+//                cancelInvitationStateFlow.value = response.
+            }
+        }
     }
 
     fun sendInvitation(parent: Parent){

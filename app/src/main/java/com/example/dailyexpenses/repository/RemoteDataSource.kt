@@ -52,5 +52,9 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun confirmInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
 
+    suspend fun cancelInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
+
     suspend fun checkParent(login: String) = serviceApi.checkParent(login)
+
+    suspend fun checkChildParent(login: String) = serviceApi.checkChildParent(login)
 }

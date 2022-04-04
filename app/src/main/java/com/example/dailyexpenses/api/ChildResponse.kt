@@ -11,15 +11,18 @@ data class Child(
     val parentId: Int? = null
     )
 
-data class ChildInvitation(val parent: Int, val confirmed: Boolean)
+data class ChildInvitation(
+    val parent: Int?,
+    val confirmed: Boolean
+    )
 
-data class ChildOfParent(
-    @SerializedName("child_id")
-    val id: Int,
-    @SerializedName("child_login")
-    val login: String,
-    val confirm: Boolean
-)
+data class ChildParent(
+    @SerializedName("parent_id")
+    val parentId: Int,
+    @SerializedName("parent_login")
+    val parentLogin: String,
+    val confirmed: Boolean
+    )
 
 //data class ChildPost(
 //    val login: String,

@@ -9,10 +9,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Child
-import com.example.dailyexpenses.api.ChildInvitation
-import com.example.dailyexpenses.api.ChildOfParent
 import com.example.dailyexpenses.databinding.RvItemChildrenBinding
-import com.example.dailyexpensespredprof.utils.prefs
 
 interface ChildrenListActionListener{
     fun confirmInvitation(child: Child)

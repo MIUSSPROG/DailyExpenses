@@ -39,7 +39,6 @@ class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {
 
         setupRecyclerView()
 
-//
         viewModel.confirmInvitationLiveData.observe(viewLifecycleOwner){ response ->
             if (response.isSuccessful){
                 viewModel.getChildrenInvitations(prefs.id)
@@ -63,7 +62,6 @@ class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {
         binding.btnParentLogout.setOnClickListener {
             prefs.isSignedIn = false
             prefs.login = ""
-            prefs.pass = ""
             prefs.role = ""
             findTopNavController().navigate(R.id.signInFragment, null, navOptions {
                 popUpTo(R.id.tabsFragment){

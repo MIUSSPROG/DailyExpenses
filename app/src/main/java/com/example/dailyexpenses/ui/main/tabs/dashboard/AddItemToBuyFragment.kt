@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class AddItemToBuyFragment(val dateToBuyItemUnix: Long, val dateToBuyItem: String): BottomSheetDialogFragment() {
+class AddItemToBuyFragment(private val dateToBuyItemUnix: Long, private val dateToBuyItem: String): BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentAddItemToBuyBinding
     private val viewModel: AddItemToBuyViewModel by viewModels()

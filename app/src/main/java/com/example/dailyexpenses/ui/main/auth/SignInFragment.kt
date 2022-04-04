@@ -41,49 +41,42 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             val pass = etPassword.text.toString()
             var isParent = true
             var isChild = true
-//            val passHash = BCrypt.withDefaults().hashToString(12, pass.toCharArray())
             val passHash = Hasher.getSecurePassword(pass)
             if (login.isNotBlank() && pass.isNotBlank()) {
-                if (login == prefs.login && pass == prefs.pass) {
-                    prefs.isSignedIn = true
-                    val direction = SignInFragmentDirections.actionSignInFragmentToTabsFragment()
-                    findNavController().navigate(direction)
-                } else {
-                    viewModel.checkChild(Child(login = login, password = passHash!!))
-                    viewModel.checkParent(Parent(login = login, password = passHash!!))
 
-                    viewModel.childToCheck.observe(viewLifecycleOwner) { child ->
-                        if (child == null) {
-                            isChild = false
-                        }else {
-                            saveInfoAndDirect("ученик", login, pass, child.id)
-                        }
+                viewModel.checkChild(Child(login = login, password = passHash!!))
+                viewModel.checkParent(Parent(login = login, password = passHash!!))
+
+                viewModel.childToCheck.observe(viewLifecycleOwner) { child ->
+                    if (child == null) {
+                        isChild = false
+                    }else {
+                        saveInfoAndDirect("ученик", login, child.id)
+                    }
+                }
+
+                viewModel.parentToCheck.observe(viewLifecycleOwner){ parent ->
+                    if (parent == null) {
+                        isParent = false
+                    }else {
+                        saveInfoAndDirect("родитель", login, parent.id)
                     }
 
-                    viewModel.parentToCheck.observe(viewLifecycleOwner){ parent ->
-                        if (parent == null) {
-                            isParent = false
-                        }else {
-                            saveInfoAndDirect("родитель", login, pass, parent.id)
-                        }
-
-                        if (!isParent && !isChild){
-                            Toast.makeText(requireContext(), "Пользователь не найден", Toast.LENGTH_SHORT).show()
-                        }
-
+                    if (!isParent && !isChild){
+                        Toast.makeText(requireContext(), "Пользователь не найден", Toast.LENGTH_SHORT).show()
                     }
 
                 }
+
             } else {
                 Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-    private fun saveInfoAndDirect(role: String, login: String, pass: String, id: Int){
+    private fun saveInfoAndDirect(role: String, login: String, id: Int){
         prefs.isSignedIn = true
         prefs.login = login
-        prefs.pass = pass
         prefs.role = role
         prefs.id = id
 
@@ -93,6 +86,7 @@ class SignInFragment : Fragment(R.layout.fragment_sign_in) {
             else -> null
         }
         if (direction != null) {
+            Toast.makeText(requireContext(), "Успешный вход!", Toast.LENGTH_SHORT).show()
             findNavController().navigate(direction)
         }else{
             Toast.makeText(requireContext(), "Ошибка навигации", Toast.LENGTH_SHORT).show()

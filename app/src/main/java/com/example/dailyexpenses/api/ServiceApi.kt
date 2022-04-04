@@ -1,5 +1,6 @@
 package com.example.dailyexpenses.api
 
+import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.ResponseBody
 import retrofit2.Response
@@ -66,10 +67,16 @@ interface ServiceApi {
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
 
     @PATCH("api/v1/send_invitation/{childId}")
-    suspend fun sendInvitation(@Path("childId") childId: Int, @Body childInvitation: ChildInvitation): Response<Child>
+    suspend fun sendInvitation(
+        @Path("childId") childId: Int,
+        @Body childInvitation: ChildInvitation
+    ): Response<Child>
 
     @GET("api/v1/check_invitation")
-    suspend fun checkInvitation(@Query("parentId") parentId: Int, @Query("login") login: String): Response<Child>
+    suspend fun checkInvitation(
+        @Query("parentId") parentId: Int,
+        @Query("login") login: String
+    ): Response<Child>
 
 //    @GET("api/v1/children_by_parentId")
 //    suspend fun getChildrenInvitations(@Query("parentId") parentId: Int): Response<List<ChildOfParent>>
@@ -78,7 +85,19 @@ interface ServiceApi {
 //    suspend fun getInvitationId(@Query("childId") childId: Int, @Query("parentId") parentId: Int): Response<Invitation>
 
     @PATCH("api/v1/confirm_invitation/{childId}")
-    suspend fun confirmInvitation(@Path("childId") childId: Int, @Body childInvitation: ChildInvitation): Response<Child>
+    suspend fun confirmInvitation(
+        @Path("childId") childId: Int,
+        @Body childInvitation: ChildInvitation
+    ): Response<Child>
+
+//    @PATCH("api/v1/confirm_invitation/{childId}")
+//    fun cancelInvitation(
+//        @Path("childId") childId: Int,
+//        @Body childInvitation: ChildInvitation
+//    ): Flow<Response<Child>>
+
+    @GET("api/v1/check_child_parent")
+    suspend fun checkChildParent(@Query("login") login: String): Response<ChildParent>
 
     companion object {
         const val BASE_URL = "https://daily-expenses.herokuapp.com/"
