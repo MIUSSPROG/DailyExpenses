@@ -6,14 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.main.tabs.dashboard.DashboardFragment">
 
-    <CalendarView
+    <com.applandeo.materialcalendarview.CalendarView
         android:id="@+id/calendarViewPlan"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="400dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:theme="@style/CalendarViewCustom"/>
+        android:theme="@style/CalendarViewCustom"
+        app:headerColor="@color/color3"
+        app:type="one_day_picker"
+        app:selectionColor="@color/color2"
+        app:eventsEnabled="true"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvDateItems"
@@ -22,7 +26,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button"
+        app:layout_constraintTop_toBottomOf="@+id/btnSendParentToConfirm"
         tools:listitem="@layout/rv_date_item" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -40,7 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnSendParentToConfirm"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Отправить на соглаcование"

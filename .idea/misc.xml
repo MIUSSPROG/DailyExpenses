@@ -3,11 +3,16 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable-v24/ic_done.xml" value="0.169" />
+        <entry key="app/src/main/res/drawable-v24/ic_question.xml" value="0.169" />
         <entry key="app/src/main/res/drawable/expandable_border.xml" value="0.2" />
+        <entry key="app/src/main/res/drawable/ic_cancel.xml" value="0.169" />
         <entry key="app/src/main/res/drawable/ic_diagram.xml" value="0.211" />
         <entry key="app/src/main/res/drawable/ic_done.xml" value="0.1915" />
         <entry key="app/src/main/res/drawable/ic_notification.xml" value="0.134" />
         <entry key="app/src/main/res/drawable/ic_profile.xml" value="0.2035" />
+        <entry key="app/src/main/res/drawable/ic_rejected.xml" value="0.169" />
+        <entry key="app/src/main/res/drawable/ic_sync.xml" value="0.169" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20774078369140625" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.41041666666666665" />
         <entry key="app/src/main/res/layout/fragment_add_item_to_buy.xml" value="0.2772440592447917" />

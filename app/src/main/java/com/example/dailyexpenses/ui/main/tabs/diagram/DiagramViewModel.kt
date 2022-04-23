@@ -17,13 +17,11 @@ class DiagramViewModel @ViewModelInject constructor(
 
     val dataForDiagram = MutableLiveData<List<DiagramData>>()
 
-    fun createChild(child: Child){
-        viewModelScope.launch {
-            expensesRepository.getRemoteDataSource().createChild(child)
-        }
-    }
-
-//    fun sharePlans()
+//    fun createChild(child: Child){
+//        viewModelScope.launch {
+//            expensesRepository.getRemoteDataSource().createChild(child)
+//        }
+//    }
 
     fun getDataForDiagram(fromDate: Long, toDate: Long){
         viewModelScope.launch {

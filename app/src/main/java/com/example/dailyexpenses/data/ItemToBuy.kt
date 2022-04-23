@@ -1,6 +1,9 @@
 package com.example.dailyexpenses.data
+
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.example.dailyexpenses.api.Plan
+import com.example.dailyexpenses.utils.HelperMethods
 import java.util.*
 
 @Entity
@@ -8,8 +11,19 @@ data class ItemToBuy(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
     val name: String,
+    val categoryId: Int,
     val category: String,
     val price: Float,
     val date: Long,
     val confirm: Boolean?
-)
+) {
+    fun convertToDbPlan(childId: Int)  =
+        Plan(
+            name = name,
+            price = price,
+            date = date,
+            confirm = confirm,
+            categoryId = categoryId,
+            childId = childId
+        )
+}

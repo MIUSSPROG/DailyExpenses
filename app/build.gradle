@@ -52,42 +52,48 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
 
-    // Chart
+    // Chart - построение графиков
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
 
-    // jetpack navigation component
+    // jetpack navigation component - организация навигации приложения
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 
-    // Lifecycle + ViewModel & LiveData
+    // Lifecycle + ViewModel & LiveData - архитектура MVVM
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycleVersion"
 
-    // fragment viewmodel
+    // fragment viewmodel - ViewModel для фрагментов
     implementation "androidx.fragment:fragment-ktx:$fragment_ktx_version"
 
-    // Room
+    // Room - работа с базами данных
     implementation "androidx.room:room-runtime:$roomVersion"
     kapt "androidx.room:room-compiler:$roomVersion"
     implementation "androidx.room:room-ktx:$roomVersion"
 
-    // Coroutines
+    // Coroutines - работа с асинхронными запросами
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutinesVersion"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutinesVersion"
 
-    // Dagger Hilt
+    // Dagger Hilt - инъекции зависимостей
     implementation "com.google.dagger:hilt-android:$hiltVersion"
     kapt "com.google.dagger:hilt-android-compiler:$hiltVersion"
     implementation "androidx.hilt:hilt-lifecycle-viewmodel:$hiltAndroidXVersion"
     kapt "androidx.hilt:hilt-compiler:$hiltAndroidXVersion"
 
-    // Retrofit
+    // Retrofit - сетевое взаимодействие
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation 'com.squareup.retrofit2:converter-gson:2.6.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.5.0'
 
+    // Glide - подгрузка изображений с сети
     implementation "com.github.bumptech.glide:glide:$glideVersion"
     annotationProcessor "com.github.bumptech.glide:compiler:$glideVersion"
 
-    implementation group: 'at.favre.lib', name: 'bcrypt', version: '0.9.0'
+//     Customizable CalendarView - календарь с множеством кастомизаций
+    implementation 'com.applandeo:material-calendar-view:1.7.0'
+
+
+//    implementation group: 'at.favre.lib', name: 'bcrypt', version: '0.9.0'
+
 }

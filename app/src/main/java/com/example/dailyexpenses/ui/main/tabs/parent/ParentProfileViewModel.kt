@@ -14,23 +14,22 @@ import retrofit2.Response
 class ParentProfileViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
-    val childrenInvitationsLiveData = MutableLiveData<Response<ParentChildren>>()
-//    val invitationIdLiveData = MutableLiveData<Response<Invitation>>()
+    val childrenInvitationsLiveData = MutableLiveData<ParentChildren?>()
     val confirmInvitationLiveData = MutableLiveData<Response<Child>>()
 
     fun getChildrenInvitations(parentId: Int){
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().getParentChildren(parentId)
-            childrenInvitationsLiveData.postValue(response)
+            when(response){
+                is ApiResponse.Success ->{
+                    childrenInvitationsLiveData.postValue(response.data!!)
+                }
+                is ApiResponse.Error ->{
+                    childrenInvitationsLiveData.postValue(null)
+                }
+            }
         }
     }
-
-//    fun getInvitationId(parentId: Int, childId: Int){
-//        viewModelScope.launch {
-//            val response = expensesRepository.getRemoteDataSource().getInvitationId(parentId, childId)
-//            invitationIdLiveData.postValue(response)
-//        }
-//    }
 
     fun confirmInvitation(child: Child){
         viewModelScope.launch {

@@ -9,7 +9,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
-import at.favre.lib.crypto.bcrypt.BCrypt
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent

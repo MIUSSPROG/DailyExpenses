@@ -15,8 +15,14 @@ interface ItemToBuyDao {
     @Delete
     suspend fun delete(itemToBuy: ItemToBuy)
 
+    @Query("SELECT * FROM ItemToBuy ORDER BY date")
+    fun getAllItems(): List<ItemToBuy>
+
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
     fun getAllItems(pickDate: Long): Flow<List<ItemToBuy>>
+
+    @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
+    suspend fun getAllItemsToSendToParentApproval(pickDate: Long): List<ItemToBuy>
 
 //    @Query("SELECT * FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate")
 //    fun getAllItemsInRange(fromDate: Long, toDate: Long): Flow<List<ItemToBuy>>

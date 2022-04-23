@@ -1,13 +1,14 @@
 package com.example.dailyexpenses.ui.main.auth
 
+import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.example.dailyexpenses.api.ApiResponse
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.repository.FirebaseRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -15,13 +16,25 @@ class SignUpViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
 
-
+    private val _childCreationLiveData = MutableLiveData<Child?>()
+    val childCreationLiveData: LiveData<Child?> = _childCreationLiveData
 
     fun createChild(child: Child){
         viewModelScope.launch {
-            expensesRepository.getRemoteDataSource().createChildEncoded(child)
+            val response = expensesRepository.getRemoteDataSource().createChildEncoded(child)
+            when(response){
+                is ApiResponse.Success ->{
+                    _childCreationLiveData.postValue(response.data!!)
+                    FirebaseRepository.saveToken(child.login)
+                }
+                is ApiResponse.Error ->{
+                    _childCreationLiveData.postValue(null)
+                    Log.d("Error", response.exception.toString())
+                }
+            }
+
         }
-        FirebaseRepository.saveToken(child.login)
+
     }
 
     fun createParent(parent: Parent){

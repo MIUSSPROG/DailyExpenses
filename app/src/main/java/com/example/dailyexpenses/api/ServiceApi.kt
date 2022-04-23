@@ -6,10 +6,19 @@ import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
 
+sealed class ApiResponse<T>(
+    date: T? = null,
+    exception: Exception? = null
+){
+    data class Success<T>(val data: T): ApiResponse<T>(data, null)
+    data class Error<T>(val exception: Exception): ApiResponse<T>(null, exception)
+}
+
+
 interface ServiceApi {
 
     @GET("api/v1/categories")
-    suspend fun getCategories(): Response<Category>
+    suspend fun getCategories(): Response<List<Category>>
 
     @GET("api/v1/parents")
     suspend fun getParents(): Response<List<Parent>>
@@ -33,8 +42,8 @@ interface ServiceApi {
     suspend fun createChild(@Body child: Child): Response<Child>
 
     @POST("api/v1/save_child_encoded/")
-    suspend fun saveChildEncoded(@Body child: Child): ResponseBody
-
+    suspend fun saveChildEncoded(@Body child: Child): Child
+//    ResponseBody
     @GET("api/v1/check_child/")
     suspend fun checkChild(
         @Query("login") login: String,
@@ -56,12 +65,17 @@ interface ServiceApi {
         @Part("confirm") confirm: Boolean,
         @Part("category") categoryId: Int,
         @Part("child") childId: Int,
-        @Part image: MultipartBody.Part
+        @Part image: MultipartBody.Part?
     ): ResponseBody
 
+    @POST("api/v1/plan/list")
+    suspend fun sendPlanToApproval(@Body plans: List<Plan>): ResponseBody
 
-    @GET("api/v1/plan/children/{id}")
-    suspend fun getChildrenPlan(@Path("id") id: Int): Response<ChildrenPlan>
+    @DELETE("api/v1/plan/{id}/destroy")
+    suspend fun deletePlan(@Path("id") id: Int): ResponseBody
+
+    @GET("api/v1/child/{id}/plans")
+    suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>
 
     @PATCH("api/v1/plan/{id}/confirm")
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
@@ -100,7 +114,7 @@ interface ServiceApi {
     suspend fun checkChildParent(@Query("login") login: String): Response<ChildParent>
 
     companion object {
-        const val BASE_URL = "https://daily-expenses.herokuapp.com/"
+        const val BASE_URL = "https://expenses-api-app.herokuapp.com/"
     }
 
 }

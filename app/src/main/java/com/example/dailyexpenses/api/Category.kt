@@ -1,3 +1,7 @@
 package com.example.dailyexpenses.api
 
-class Category (val id: Int, val name: String)
+data class Category (val id: Int, val name: String){
+    override fun toString(): String {
+        return name
+    }
+}

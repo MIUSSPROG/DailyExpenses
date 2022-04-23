@@ -3,7 +3,9 @@ package com.example.dailyexpenses.repository
 import com.example.dailyexpenses.api.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
+import retrofit2.HttpException
 import retrofit2.Retrofit
+import java.io.IOException
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
@@ -16,31 +18,54 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun createParentEncoded(parentPost: Parent) = serviceApi.saveParentEncoded(parentPost)
 
-    suspend fun getParentChildren(id: Int) = serviceApi.getParentChildren(id)
+    suspend fun getParentChildren(id: Int):ApiResponse<ParentChildren>{
+        return try {
+            val response = serviceApi.getParentChildren(id).body()!!
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun getChildren() = serviceApi.getChildren()
 
-    suspend fun createChild(child: Child) = serviceApi.createChild(child)
+//    suspend fun createChild(child: Child): ApiResponse<Child>{
+//        return try {
+//            val response = serviceApi.createChild(child).body()!!
+//                ApiResponse.Success(data = response)
+//        }catch (e: HttpException){
+//            ApiResponse.Error(exception = e)
+//        }catch (e: IOException){
+//            ApiResponse.Error(exception = e)
+//        }
+//    }
 
-    suspend fun createChildEncoded(child: Child) = serviceApi.saveChildEncoded(child)
+    suspend fun createChildEncoded(child: Child): ApiResponse<Child>{
+        return try {
+            val response = serviceApi.saveChildEncoded(child)
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun checkChild(child: Child) = serviceApi.checkChild(child.login, child.password)
 
     suspend fun checkParent(parent: Parent) = serviceApi.checkParent(parent.login, parent.password)
 
-    suspend fun createPlan(
-        name: String,
-        price: Float,
-        date: String,
-        confirm: Boolean,
-        categoryId: Int,
-        childId: Int,
-        image: MultipartBody.Part
-    ) = serviceApi.createPlan(name, price, date, confirm, categoryId, childId, image)
+//    suspend fun createPlan(plan: Plan) = serviceApi.createPlan(plan.name, plan.price, plan.date, plan.confirm, plan.categoryId, plan.childId, plan.image)
 
-    suspend fun getChildrenPlan(id: Int) = serviceApi.getChildrenPlan(id)
+    suspend fun sendPlanToApproval(plans: List<Plan>) = serviceApi.sendPlanToApproval(plans)
+
+    suspend fun getChildPlans(id: Int) = serviceApi.getChildPlans(id)
 
     suspend fun confirmPlan(id: Int, plan: Plan) = serviceApi.confirmPlan(id, plan)
+
+    suspend fun deletePlan(childId: Int) = serviceApi.deletePlan(childId)
 
     suspend fun sendInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.sendInvitation(id, childInvitation)
 

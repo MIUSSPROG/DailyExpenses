@@ -53,7 +53,14 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
                     val parent = Parent(login = loginToSave, password = passwordToSave)
                     viewModel.createParent(parent)
                 }
-                Toast.makeText(requireContext(), "Вы успешно зарегистрированы!", Toast.LENGTH_SHORT).show()
+
+                viewModel.childCreationLiveData.observe(viewLifecycleOwner){ childResponse ->
+                    if (childResponse == null){
+                        Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
+                    }else{
+                        Toast.makeText(requireContext(), "Вы успешно зарегистрированы!", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
             else{
                 Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()

@@ -50,13 +50,14 @@ class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {
 
         viewModel.getChildrenInvitations(prefs.id)
         viewModel.childrenInvitationsLiveData.observe(viewLifecycleOwner){ response ->
-            if (response.isSuccessful) {
-                binding.pbLoadChildren.visibility = View.INVISIBLE
-                childrenListAdapter.submitList(response.body()?.children)
-            }
-            else{
+            if (response == null) {
                 Toast.makeText(requireContext(), "Ошибка подгрузки данных!", Toast.LENGTH_SHORT).show()
             }
+            else{
+                childrenListAdapter.submitList(response.children)
+                binding.pbLoadChildren.visibility = View.INVISIBLE
+            }
+
         }
 
         binding.btnParentLogout.setOnClickListener {
