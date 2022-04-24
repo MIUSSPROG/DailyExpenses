@@ -16,10 +16,10 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20774078369140625" />
         <entry key="app/src/main/res/layout/activity_start.xml" value="0.41041666666666665" />
         <entry key="app/src/main/res/layout/fragment_add_item_to_buy.xml" value="0.2772440592447917" />
-        <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.30228881835937504" />
+        <entry key="app/src/main/res/layout/fragment_dashboard.xml" value="0.2627105712890625" />
         <entry key="app/src/main/res/layout/fragment_diagram.xml" value="0.3530624389648438" />
         <entry key="app/src/main/res/layout/fragment_forecast.xml" value="0.4244791666666667" />
-        <entry key="app/src/main/res/layout/fragment_parent_dashboard.xml" value="0.3365275065104167" />
+        <entry key="app/src/main/res/layout/fragment_parent_dashboard.xml" value="0.26930694580078124" />
         <entry key="app/src/main/res/layout/fragment_parent_profile.xml" value="0.2727625528971354" />
         <entry key="app/src/main/res/layout/fragment_parent_tabs.xml" value="0.2881540934244792" />
         <entry key="app/src/main/res/layout/fragment_profile.xml" value="0.28003021240234377" />
@@ -30,7 +30,7 @@
         <entry key="app/src/main/res/layout/operation_item.xml" value="0.4244791666666667" />
         <entry key="app/src/main/res/layout/rv_date_item.xml" value="0.31025641025641026" />
         <entry key="app/src/main/res/layout/rv_item_child.xml" value="0.3572586059570313" />
-        <entry key="app/src/main/res/layout/rv_item_child_plan.xml" value="0.4088541666666667" />
+        <entry key="app/src/main/res/layout/rv_item_child_plan.xml" value="0.2890960693359375" />
         <entry key="app/src/main/res/layout/rv_item_children.xml" value="0.3175925925925926" />
         <entry key="app/src/main/res/menu/tabs_menu.xml" value="0.3409250895182292" />
         <entry key="app/src/main/res/menu/tabs_parent_menu.xml" value="0.4244791666666667" />

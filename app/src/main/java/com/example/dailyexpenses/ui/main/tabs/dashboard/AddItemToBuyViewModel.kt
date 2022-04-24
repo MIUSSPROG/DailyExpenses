@@ -24,8 +24,9 @@ class AddItemToBuyViewModel @ViewModelInject constructor(
 
     fun getCategories() = viewModelScope.launch {
         val response = expensesRepository.getRemoteDataSource().getCategories()
-        if (response.isSuccessful && response.body() != null){
-            _categoriesLiveData.postValue(response.body())
-        }
+        _categoriesLiveData.postValue(response)
+//        if (response.isSuccessful && response.body() != null){
+//            _categoriesLiveData.postValue(response.body())
+//        }
     }
 }

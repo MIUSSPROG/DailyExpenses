@@ -16,7 +16,7 @@ interface ItemToBuyDao {
     suspend fun delete(itemToBuy: ItemToBuy)
 
     @Query("SELECT * FROM ItemToBuy ORDER BY date")
-    fun getAllItems(): List<ItemToBuy>
+    suspend fun getAllItemsOrderedByDate(): List<ItemToBuy>
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
     fun getAllItems(pickDate: Long): Flow<List<ItemToBuy>>

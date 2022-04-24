@@ -9,7 +9,11 @@ data class Child(
     val confirmed: Boolean = false,
     @SerializedName("parent")
     val parentId: Int? = null
-    )
+    ){
+    override fun toString(): String {
+        return login
+    }
+}
 
 data class ChildInvitation(
     val parent: Int?,

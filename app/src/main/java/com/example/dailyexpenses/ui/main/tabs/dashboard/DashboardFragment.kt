@@ -84,7 +84,12 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
         }
 
         viewModel.plansLiveData.observe(viewLifecycleOwner){ response ->
-            Toast.makeText(requireContext(), response.toString(), Toast.LENGTH_SHORT).show()
+            if (response == 400){
+                Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+            }
+            else {
+                Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
+            }
         }
 
         setupRecyclerViewSwipeToDelete()

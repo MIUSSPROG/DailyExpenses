@@ -19,6 +19,7 @@ data class ItemToBuy(
 ) {
     fun convertToDbPlan(childId: Int)  =
         Plan(
+            id = id,
             name = name,
             price = price,
             date = date,

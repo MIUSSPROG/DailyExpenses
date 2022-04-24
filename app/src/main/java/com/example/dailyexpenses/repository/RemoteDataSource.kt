@@ -14,7 +14,7 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun getParents() = serviceApi.getParents()
 
-    suspend fun createParent(parentPost: Parent) = serviceApi.createParent(parentPost)
+//    suspend fun createParent(parentPost: Parent) = serviceApi.createParent(parentPost)
 
     suspend fun createParentEncoded(parentPost: Parent) = serviceApi.saveParentEncoded(parentPost)
 
@@ -59,11 +59,40 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
 //    suspend fun createPlan(plan: Plan) = serviceApi.createPlan(plan.name, plan.price, plan.date, plan.confirm, plan.categoryId, plan.childId, plan.image)
 
-    suspend fun sendPlanToApproval(plans: List<Plan>) = serviceApi.sendPlanToApproval(plans)
+    suspend fun sendPlansForApproval(plans: List<Plan>): ApiResponse<Int>{
+        return try {
+            val response = serviceApi.sendPlansForApproval(plans).code()
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun getChildPlans(id: Int) = serviceApi.getChildPlans(id)
 
-    suspend fun confirmPlan(id: Int, plan: Plan) = serviceApi.confirmPlan(id, plan)
+    suspend fun getFilteredPlans(mode: Boolean, childId: Int): ApiResponse<List<Plan>>{
+        return try {
+            val response = serviceApi.getFilteredPlans(mode, childId)
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
+
+    suspend fun confirmPlan(id: Int, plan: PlanConfirm): ApiResponse<Plan>{
+        return try {
+            val response = serviceApi.confirmPlan(id, plan)
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun deletePlan(childId: Int) = serviceApi.deletePlan(childId)
 

@@ -18,7 +18,7 @@ sealed class ApiResponse<T>(
 interface ServiceApi {
 
     @GET("api/v1/categories")
-    suspend fun getCategories(): Response<List<Category>>
+    suspend fun getCategories(): List<Category>
 
     @GET("api/v1/parents")
     suspend fun getParents(): Response<List<Parent>>
@@ -69,7 +69,7 @@ interface ServiceApi {
     ): ResponseBody
 
     @POST("api/v1/plan/list")
-    suspend fun sendPlanToApproval(@Body plans: List<Plan>): ResponseBody
+    suspend fun sendPlansForApproval(@Body plans: List<Plan>): Response<List<Plan>>
 
     @DELETE("api/v1/plan/{id}/destroy")
     suspend fun deletePlan(@Path("id") id: Int): ResponseBody
@@ -77,8 +77,11 @@ interface ServiceApi {
     @GET("api/v1/child/{id}/plans")
     suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>
 
+    @GET("api/v1/child/filtered_plans")
+    suspend fun getFilteredPlans(@Query("mode") mode: Boolean, @Query("childId") childId: Int): List<Plan>
+
     @PATCH("api/v1/plan/{id}/confirm")
-    suspend fun confirmPlan(@Path("id") id: Int, @Body plan: Plan)
+    suspend fun confirmPlan(@Path("id") id: Int, @Body plan: PlanConfirm): Plan
 
     @PATCH("api/v1/send_invitation/{childId}")
     suspend fun sendInvitation(
