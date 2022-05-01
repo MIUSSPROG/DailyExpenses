@@ -61,8 +61,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun sendPlansForApproval(plans: List<Plan>): ApiResponse<Int>{
         return try {
-            val response = serviceApi.sendPlansForApproval(plans).code()
-            ApiResponse.Success(data = response)
+            val response = serviceApi.sendPlansForApproval(plans)
+            ApiResponse.Success(data = response.code())
         }catch (e: HttpException){
             ApiResponse.Error(exception = e)
         }catch (e: IOException){

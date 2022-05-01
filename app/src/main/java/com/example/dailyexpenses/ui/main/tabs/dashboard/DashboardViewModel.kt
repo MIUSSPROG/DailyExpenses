@@ -56,12 +56,17 @@ class DashboardViewModel @ViewModelInject constructor(
                     expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
                 }
 
-                val plansFromServer = plansFromServerDeffered.await()
+                val plansFromServer = plansFromServerDeffered.await().body()?.plans!!.filter { it.confirm != null }
                 val plansFromDB = plansFromDBDeffered.await()
 
-                if (plansFromServer.isSuccessful && plansFromDB.isNotEmpty()) {
-                    plansFromServer.body()?.plans?.forEach {
-
+                if (plansFromServer.isNotEmpty() && plansFromDB.isNotEmpty()) {
+                    plansFromServer?.forEach { serverPlan ->
+                        val planExist = plansFromDB.firstOrNull{plan -> plan.id == serverPlan.dbId}
+                        if (planExist != null){
+                            if (serverPlan.confirm != null){
+                                expensesRepository.getItemToBuyDao().update(planExist.copy(confirm = serverPlan.confirm))
+                            }
+                        }
                     }
 //                    var plansFromServerGroupByDate = mutableMapOf<Long, MutableList<Plan>>()
 //                    var plansFromDbGroupByDate = mutableMapOf<Long, MutableList<Plan>>()
@@ -103,20 +108,23 @@ class DashboardViewModel @ViewModelInject constructor(
             val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
             val plansForApproval = mutableListOf<Plan>()
 
-            itemsToBuyFromDB.forEach { item ->
+            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
                 val plan = Plan(name = item.name,
                     price = item.price,
                     date = item.date,
                     confirm = item.confirm,
                     categoryId = item.categoryId,
                     childId = prefs.id,
-                    dbId = item.id
+                    dbId = item.id,
                 )
                 plansForApproval.add(plan)
             }
             val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
             when(response){
                 is ApiResponse.Success -> {
+                    itemsToBuyFromDB.forEach {
+                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+                    }
                     _plansLiveData.postValue(response.data!!)
                 }
                 is ApiResponse.Error -> {

@@ -21,10 +21,10 @@ class ParentProfileViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().getParentChildren(parentId)
             when(response){
-                is ApiResponse.Success ->{
+                is ApiResponse.Success -> {
                     childrenInvitationsLiveData.postValue(response.data!!)
                 }
-                is ApiResponse.Error ->{
+                is ApiResponse.Error -> {
                     childrenInvitationsLiveData.postValue(null)
                 }
             }

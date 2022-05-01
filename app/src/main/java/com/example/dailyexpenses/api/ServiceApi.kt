@@ -7,7 +7,7 @@ import retrofit2.Response
 import retrofit2.http.*
 
 sealed class ApiResponse<T>(
-    date: T? = null,
+    data: T? = null,
     exception: Exception? = null
 ){
     data class Success<T>(val data: T): ApiResponse<T>(data, null)

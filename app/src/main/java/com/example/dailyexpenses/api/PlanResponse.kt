@@ -1,5 +1,6 @@
 package com.example.dailyexpenses.api
 
+import com.example.dailyexpenses.data.ItemToBuy
 import com.google.gson.annotations.SerializedName
 import okhttp3.MultipartBody
 

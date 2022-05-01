@@ -22,6 +22,9 @@ class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewH
                 else if (itemToBuy.confirm == false){
                     imgvConfirmStatus.setImageResource(R.drawable.ic_cancel)
                 }
+                else if (itemToBuy.send){
+                    imgvConfirmStatus.setImageResource(R.drawable.ic_sync)
+                }
                 else{
                     imgvConfirmStatus.setImageDrawable(null)
                 }
