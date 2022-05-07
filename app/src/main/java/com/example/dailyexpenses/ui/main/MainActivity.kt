@@ -11,6 +11,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.fragment.findNavController
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.databinding.ActivityMainBinding
+import com.example.dailyexpenses.ui.main.auth.SignInViewModel.Companion.PARENT_ROLE
 import com.example.dailyexpenses.ui.main.tabs.TabsFragment
 import com.example.dailyexpensespredprof.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +46,7 @@ class MainActivity : AppCompatActivity() {
 //        setSupportActionBar(binding.toolbar)
 
         val navController = getRootNavController()
-        prepareRootNavController(isSignedIn(), prefs.role, navController)
+        prepareRootNavController(prefs.isSignedIn, prefs.role, navController)
         onNavControllerActivated(navController)
 
         supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, true)
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
     private fun prepareRootNavController(isSignedIn: Boolean, role: String, navController: NavController) {
         val graph = navController.navInflater.inflate(getMainNavigationGraphId())
         graph.setStartDestination( if (isSignedIn) {
-            if (role == "родитель"){
+            if (role == PARENT_ROLE){
                 getParentTabsDestination()
             }
             else {

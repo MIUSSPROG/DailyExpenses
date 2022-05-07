@@ -14,7 +14,11 @@ import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.utils.HelperMethods
 import com.example.dailyexpensespredprof.utils.prefs
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.receiveAsFlow
 import okhttp3.ResponseBody
 import java.lang.Exception
 import java.util.*
@@ -24,11 +28,20 @@ class DashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
 
-    private val _itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
-    val itemToBuyLiveData: LiveData<List<ItemToBuy>> = _itemToBuyLiveData
+//    private val _itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
+//    val itemToBuyLiveData: LiveData<List<ItemToBuy>> = _itemToBuyLiveData
+
+    private val _itemsToBuy = MutableStateFlow<LoginUiState>(LoginUiState.Empty)
+    val itemsToBuy: StateFlow<LoginUiState> = _itemsToBuy
 
     private val _plansLiveData = MutableLiveData<Int>()
     val plansLiveData: LiveData<Int> = _plansLiveData
+
+    private val _plansFlow = MutableStateFlow<LoginUiState>(LoginUiState.Empty)
+    val planFlow: StateFlow<LoginUiState> = _plansFlow
+
+    private val plansChannel = Channel<LoginUiState>()
+    val plansChannelFlow = plansChannel.receiveAsFlow()
 
     private val _childPlansFromServer = MutableLiveData<List<Plan>>()
     val childPlansFromServer: LiveData<List<Plan>> = _childPlansFromServer
@@ -36,7 +49,8 @@ class DashboardViewModel @ViewModelInject constructor(
     fun getItemsToBuy(pickedDate: Long){
         viewModelScope.launch {
             expensesRepository.getItemToBuyDao().getAllItems(pickedDate).collect {
-                _itemToBuyLiveData.postValue(it)
+//                _itemToBuyLiveData.postValue(it)
+                _itemsToBuy.value = LoginUiState.Success(data = it)
             }
         }
     }
@@ -103,6 +117,37 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
+    fun sendItemToBuyForParentApproval(pickedDate: Long) = viewModelScope.launch{
+        val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
+        val plansForApproval = mutableListOf<Plan>()
+
+        itemsToBuyFromDB.filter { !it.send }.forEach { item ->
+            val plan = Plan(name = item.name,
+                price = item.price,
+                date = item.date,
+                confirm = item.confirm,
+                categoryId = item.categoryId,
+                childId = prefs.id,
+                dbId = item.id,
+            )
+            plansForApproval.add(plan)
+        }
+        val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
+        when(response){
+            is ApiResponse.Success -> {
+                itemsToBuyFromDB.forEach {
+                    expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+                }
+//                _plansFlow.value = LoginUiState.Success
+                plansChannel.send(LoginUiState.Success<Nothing>())
+            }
+            is ApiResponse.Error -> {
+//                _plansFlow.value = LoginUiState.Error("Некорректные данные")
+                plansChannel.send(LoginUiState.Error("Некорректные данные"))
+            }
+        }
+    }
+
     fun sendItemToBuyToParentApproval(pickedDate: Long){
         viewModelScope.launch {
             val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
@@ -144,5 +189,10 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
+    sealed class LoginUiState{
+        data class Success<T>(val data: T? = null): LoginUiState()
+        data class Error(val message: String): LoginUiState()
+        object Empty: LoginUiState()
+    }
 
 }

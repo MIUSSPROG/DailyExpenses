@@ -7,12 +7,14 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.applandeo.materialcalendarview.EventDay
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Plan
+import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.data.ItemsToBuyAdapter
 import com.example.dailyexpenses.databinding.FragmentAddItemToBuyBinding
 import com.example.dailyexpenses.databinding.FragmentDashboardBinding
@@ -20,6 +22,7 @@ import com.example.dailyexpenses.utils.HelperMethods
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDate
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDateMills
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.properties.Delegates
@@ -75,22 +78,49 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             }
 
             btnSendParentToConfirm.setOnClickListener {
-                viewModel.sendItemToBuyToParentApproval(selectedDateUnix)
+//                viewModel.sendItemToBuyToParentApproval(selectedDateUnix)
+                viewModel.sendItemToBuyForParentApproval(selectedDateUnix)
             }
         }
 
-        viewModel.itemToBuyLiveData.observe(viewLifecycleOwner){
-            itemsToBuyAdapter.submitList(it)
+//        viewModel.itemToBuyLiveData.observe(viewLifecycleOwner){
+//            itemsToBuyAdapter.submitList(it)
+//        }
+
+        lifecycleScope.launchWhenStarted {
+
+            viewModel.itemsToBuy.collect {
+                when(it){
+                    is DashboardViewModel.LoginUiState.Success<*> -> {
+                        itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+                    }
+                    is DashboardViewModel.LoginUiState.Error -> {
+                        Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            viewModel.plansChannelFlow.collect {
+                when(it){
+                    is DashboardViewModel.LoginUiState.Success<*> -> {
+//                        viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+                        Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
+                    }
+                    is DashboardViewModel.LoginUiState.Error -> {
+                        Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
         }
 
-        viewModel.plansLiveData.observe(viewLifecycleOwner){ response ->
-            if (response == 400){
-                Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
-            }
-            else {
-                Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
-            }
-        }
+//        viewModel.plansLiveData.observe(viewLifecycleOwner){ response ->
+//            if (response == 400){
+//                Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+//            }
+//            else {
+//                Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
+//            }
+//        }
 
         setupRecyclerViewSwipeToDelete()
         return binding.root
