@@ -9,14 +9,14 @@ interface ItemToBuyDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(itemToBuy: ItemToBuy)
 
-    @Update
-    suspend fun update(itemToBuy: ItemToBuy)
-
     @Delete
     suspend fun delete(itemToBuy: ItemToBuy)
 
     @Query("SELECT * FROM ItemToBuy ORDER BY date")
     suspend fun getAllItemsOrderedByDate(): List<ItemToBuy>
+
+    @Update
+    suspend fun update(itemToBuy: ItemToBuy)
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
     fun getAllItems(pickDate: Long): Flow<List<ItemToBuy>>

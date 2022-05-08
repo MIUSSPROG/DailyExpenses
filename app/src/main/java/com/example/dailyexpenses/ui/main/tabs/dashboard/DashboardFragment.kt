@@ -7,26 +7,22 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.applandeo.materialcalendarview.EventDay
 import com.example.dailyexpenses.R
-import com.example.dailyexpenses.api.Plan
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.data.ItemsToBuyAdapter
-import com.example.dailyexpenses.databinding.FragmentAddItemToBuyBinding
 import com.example.dailyexpenses.databinding.FragmentDashboardBinding
-import com.example.dailyexpenses.utils.HelperMethods
-import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDate
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDateMills
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
-import java.text.SimpleDateFormat
+import kotlinx.coroutines.launch
 import java.util.*
 import kotlin.properties.Delegates
-import kotlin.time.days
 
 @AndroidEntryPoint
 class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
@@ -56,7 +52,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 //        events.add(EventDay(calendar, R.drawable.ic_done))
 //        events.add(EventDay(calendar2, R.drawable.ic_done))
 
-        viewModel.setCalendarEvents()
+//        viewModel.setCalendarEvents()
 
 //        binding.calendarViewPlan.setEvents(events)
 
@@ -66,7 +62,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
 
             calendarViewPlan.setOnDayClickListener { eventDay ->
-                selectedDateUnix = eventDay.calendar.timeInMillis
+                selectedDateUnix = convertMillisToDateMills(eventDay.calendar.timeInMillis)
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
             }
 
@@ -78,40 +74,63 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             }
 
             btnSendParentToConfirm.setOnClickListener {
-//                viewModel.sendItemToBuyToParentApproval(selectedDateUnix)
                 viewModel.sendItemToBuyForParentApproval(selectedDateUnix)
             }
         }
 
-//        viewModel.itemToBuyLiveData.observe(viewLifecycleOwner){
-//            itemsToBuyAdapter.submitList(it)
-//        }
 
-        lifecycleScope.launchWhenStarted {
-
-            viewModel.itemsToBuy.collect {
-                when(it){
-                    is DashboardViewModel.LoginUiState.Success<*> -> {
-                        itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
-                    }
-                    is DashboardViewModel.LoginUiState.Error -> {
-                        Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.itemsToBuy.collect {
+                    when(it){
+                        is DashboardViewModel.DashboardUiState.Success<*> -> {
+                            itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+                        }
+                        is DashboardViewModel.DashboardUiState.Error -> {
+                            Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
-            }
 
-            viewModel.plansChannelFlow.collect {
-                when(it){
-                    is DashboardViewModel.LoginUiState.Success<*> -> {
-//                        viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
-                        Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
-                    }
-                    is DashboardViewModel.LoginUiState.Error -> {
-                        Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+                viewModel.plansChannelFlow.collect {
+                    when(it){
+                        is DashboardViewModel.DashboardUiState.Success<*> -> {
+                            viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+                            Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
+                        }
+                        is DashboardViewModel.DashboardUiState.Error -> {
+                            Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             }
         }
+
+//        lifecycleScope.launch {
+//
+//            viewModel.itemsToBuy.collect {
+//                when(it){
+//                    is DashboardViewModel.LoginUiState.Success<*> -> {
+//                        itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+//                    }
+//                    is DashboardViewModel.LoginUiState.Error -> {
+//                        Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            }
+//
+//            viewModel.plansChannelFlow.collect {
+//                when(it){
+//                    is DashboardViewModel.LoginUiState.Success<*> -> {
+////                        viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+//                        Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
+//                    }
+//                    is DashboardViewModel.LoginUiState.Error -> {
+//                        Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+//            }
+//        }
 
 //        viewModel.plansLiveData.observe(viewLifecycleOwner){ response ->
 //            if (response == 400){

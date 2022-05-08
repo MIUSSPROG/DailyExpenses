@@ -19,10 +19,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
-import okhttp3.ResponseBody
 import java.lang.Exception
 import java.util.*
-import kotlin.math.exp
 
 class DashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
@@ -31,29 +29,57 @@ class DashboardViewModel @ViewModelInject constructor(
 //    private val _itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
 //    val itemToBuyLiveData: LiveData<List<ItemToBuy>> = _itemToBuyLiveData
 
-    private val _itemsToBuy = MutableStateFlow<LoginUiState>(LoginUiState.Empty)
-    val itemsToBuy: StateFlow<LoginUiState> = _itemsToBuy
-
     private val _plansLiveData = MutableLiveData<Int>()
     val plansLiveData: LiveData<Int> = _plansLiveData
 
-    private val _plansFlow = MutableStateFlow<LoginUiState>(LoginUiState.Empty)
-    val planFlow: StateFlow<LoginUiState> = _plansFlow
+    private val _plansFlow = MutableStateFlow<DashboardUiState>(DashboardUiState.Empty)
+    val planFlow: StateFlow<DashboardUiState> = _plansFlow
 
-    private val plansChannel = Channel<LoginUiState>()
+    private val plansChannel = Channel<DashboardUiState>()
     val plansChannelFlow = plansChannel.receiveAsFlow()
 
     private val _childPlansFromServer = MutableLiveData<List<Plan>>()
     val childPlansFromServer: LiveData<List<Plan>> = _childPlansFromServer
 
+    private val _itemsToBuy = MutableStateFlow<DashboardUiState>(DashboardUiState.Empty)
+    val itemsToBuy: StateFlow<DashboardUiState> = _itemsToBuy
+
     fun getItemsToBuy(pickedDate: Long){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            val plansFromServerDeffered = async{
+                expensesRepository.getRemoteDataSource().getChildPlans(prefs.id)
+            }
+
+            val plansFromDBDeffered = async{
+                expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
+            }
+
+            val plansFromServer = plansFromServerDeffered.await().body()?.plans
+            val plansFromDB = plansFromDBDeffered.await()
+
+            plansFromServer?.forEach { serverPlan ->
+                val planExist = plansFromDB.firstOrNull{ plan -> plan.id == serverPlan.dbId }
+                if (planExist != null){
+                    if (serverPlan.confirm != null){
+                        expensesRepository.getItemToBuyDao()
+                            .update(planExist.copy(confirm = serverPlan.confirm))
+                    }
+                }
+            }
+
             expensesRepository.getItemToBuyDao().getAllItems(pickedDate).collect {
-//                _itemToBuyLiveData.postValue(it)
-                _itemsToBuy.value = LoginUiState.Success(data = it)
+                _itemsToBuy.value = DashboardUiState.Success(data = it)
             }
         }
     }
+
+
+//    private fun updateItem(item: ItemToBuy, plan: Plan){
+//        viewModelScope.launch {
+//            expensesRepository.getItemToBuyDao()
+//                .update(item.copy(confirm = plan.confirm))
+//        }
+//    }
 
     fun setCalendarEvents(){
         viewModelScope.launch {
@@ -139,11 +165,11 @@ class DashboardViewModel @ViewModelInject constructor(
                     expensesRepository.getItemToBuyDao().update(it.copy(send = true))
                 }
 //                _plansFlow.value = LoginUiState.Success
-                plansChannel.send(LoginUiState.Success<Nothing>())
+                plansChannel.send(DashboardUiState.Success<Nothing>())
             }
             is ApiResponse.Error -> {
 //                _plansFlow.value = LoginUiState.Error("Некорректные данные")
-                plansChannel.send(LoginUiState.Error("Некорректные данные"))
+                plansChannel.send(DashboardUiState.Error("Некорректные данные"))
             }
         }
     }
@@ -189,10 +215,10 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
-    sealed class LoginUiState{
-        data class Success<T>(val data: T? = null): LoginUiState()
-        data class Error(val message: String): LoginUiState()
-        object Empty: LoginUiState()
+    sealed class DashboardUiState{
+        data class Success<T>(val data: T? = null): DashboardUiState()
+        data class Error(val message: String): DashboardUiState()
+        object Empty: DashboardUiState()
     }
 
 }
