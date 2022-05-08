@@ -41,8 +41,8 @@ class DashboardViewModel @ViewModelInject constructor(
     private val _childPlansFromServer = MutableLiveData<List<Plan>>()
     val childPlansFromServer: LiveData<List<Plan>> = _childPlansFromServer
 
-    private val _itemsToBuy = MutableStateFlow<DashboardUiState>(DashboardUiState.Empty)
-    val itemsToBuy: StateFlow<DashboardUiState> = _itemsToBuy
+    private val _itemsToBuy = MutableLiveData<DashboardUiState>(DashboardUiState.Empty)
+    val itemsToBuy: LiveData<DashboardUiState> = _itemsToBuy
 
     fun getItemsToBuy(pickedDate: Long){
         viewModelScope.launch(Dispatchers.IO) {
@@ -67,9 +67,8 @@ class DashboardViewModel @ViewModelInject constructor(
                 }
             }
 
-            expensesRepository.getItemToBuyDao().getAllItems(pickedDate).collect {
-                _itemsToBuy.value = DashboardUiState.Success(data = it)
-            }
+            val res = expensesRepository.getItemToBuyDao().getAllItems(pickedDate)
+            _itemsToBuy.postValue(DashboardUiState.Success(data = res))
         }
     }
 

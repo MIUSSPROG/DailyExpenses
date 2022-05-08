@@ -10,6 +10,9 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,10 +31,11 @@ import kotlin.properties.Delegates
 class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
     private lateinit var binding: FragmentDashboardBinding
-    private lateinit var bottomSheet: AddItemToBuyFragment
+//    private lateinit var bottomSheet: AddItemToBuyFragment
     private var selectedDateUnix by Delegates.notNull<Long>()
     private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter() }
     private val viewModel: DashboardViewModel by viewModels()
+    val args: DashboardFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,8 +61,10 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 //        binding.calendarViewPlan.setEvents(events)
 
         binding.apply {
+
             val calendar = Calendar.getInstance()
             selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis)
+
             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
 
             calendarViewPlan.setOnDayClickListener { eventDay ->
@@ -66,31 +72,44 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
             }
 
-            btnAddDateItem.setOnClickListener{
-                bottomSheet = AddItemToBuyFragment(selectedDateUnix)
-                if (!bottomSheet.isAdded){
-                    bottomSheet.show(childFragmentManager, "")
-                }
+            btnAddItem.setOnClickListener{
+                val action = DashboardFragmentDirections.navigateToAddItemToBuyFragment(selectedDateUnix)
+                findNavController().navigate(action)
+//                bottomSheet = AddItemToBuyFragment(selectedDateUnix)
+//                if (!bottomSheet.isAdded){
+//                    bottomSheet.show(childFragmentManager, "")
+//                }
             }
+
 
             btnSendParentToConfirm.setOnClickListener {
                 viewModel.sendItemToBuyForParentApproval(selectedDateUnix)
             }
         }
 
+        viewModel.itemsToBuy.observe(viewLifecycleOwner){
+            when(it){
+                is DashboardViewModel.DashboardUiState.Success<*> -> {
+                    itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+                }
+                is DashboardViewModel.DashboardUiState.Error -> {
+                            Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.itemsToBuy.collect {
-                    when(it){
-                        is DashboardViewModel.DashboardUiState.Success<*> -> {
-                            itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
-                        }
-                        is DashboardViewModel.DashboardUiState.Error -> {
-                            Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
+//                viewModel.itemsToBuy.collect {
+//                    when(it){
+//                        is DashboardViewModel.DashboardUiState.Success<*> -> {
+//                            itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+//                        }
+//                        is DashboardViewModel.DashboardUiState.Error -> {
+//                            Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
+//                        }
+//                    }
+//                }
 
                 viewModel.plansChannelFlow.collect {
                     when(it){

@@ -19,7 +19,7 @@ interface ItemToBuyDao {
     suspend fun update(itemToBuy: ItemToBuy)
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
-    fun getAllItems(pickDate: Long): Flow<List<ItemToBuy>>
+    suspend fun getAllItems(pickDate: Long): List<ItemToBuy>
 
     @Query("SELECT * FROM ItemToBuy WHERE date = :pickDate")
     suspend fun getAllItemsToSendToParentApproval(pickDate: Long): List<ItemToBuy>

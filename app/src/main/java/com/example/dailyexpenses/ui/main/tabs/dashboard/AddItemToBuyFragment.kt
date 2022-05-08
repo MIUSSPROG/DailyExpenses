@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.dailyexpenses.api.Category
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.databinding.FragmentAddItemToBuyBinding
@@ -16,12 +18,13 @@ import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
 
 @AndroidEntryPoint
-class AddItemToBuyFragment(private val dateToBuyItem: Long): BottomSheetDialogFragment() {
+class AddItemToBuyFragment: BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentAddItemToBuyBinding
     private val viewModel: AddItemToBuyViewModel by viewModels()
     private lateinit var categories: List<Category>
     private var selectedCategory: Category? = null
+    val args: AddItemToBuyFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,9 +32,9 @@ class AddItemToBuyFragment(private val dateToBuyItem: Long): BottomSheetDialogFr
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentAddItemToBuyBinding.inflate(inflater, container, false)
-
+//        private val dateToBuyItem: Long
         binding.apply {
-            tvDateToBuy.text = HelperMethods.convertMillisToDate(dateToBuyItem)
+            tvDateToBuy.text = HelperMethods.convertMillisToDate(args.dateToBuyItem)
 
             viewModel.getCategories()
             viewModel.categoriesLiveData.observe(viewLifecycleOwner){
@@ -51,10 +54,12 @@ class AddItemToBuyFragment(private val dateToBuyItem: Long): BottomSheetDialogFr
                 val sumToBuy = etSumToBuy.text.toString()
 
                 if (selectedCategory != null && plan.isNotBlank() && sumToBuy.isNotBlank()){
-                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = dateToBuyItem, category = selectedCategory!!.name, categoryId = selectedCategory!!.id, confirm = null)
+                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = args.dateToBuyItem, category = selectedCategory!!.name, categoryId = selectedCategory!!.id, confirm = null)
                     viewModel.saveItemToBuy(itemToBuy)
+                    val action = AddItemToBuyFragmentDirections.navigateToDashboardFragment(args.dateToBuyItem)
+                    findNavController().navigate(action)
 //                    Toast.makeText(requireContext(), "элемент $itemToBuy успешно сохранен!", Toast.LENGTH_SHORT).show()
-                    dismiss()
+//                    dismiss()
                 }
                 else{
                     Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()

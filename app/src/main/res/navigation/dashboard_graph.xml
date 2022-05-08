@@ -9,5 +9,24 @@
         android:id="@+id/dashboardFragment"
         android:name="com.example.dailyexpenses.ui.main.tabs.dashboard.DashboardFragment"
         android:label="fragment_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/navigate_to_addItemToBuyFragment"
+            app:destination="@id/addItemToBuyFragment" />
+        <argument
+            android:name="selectedDate"
+            app:argType="long" />
+    </fragment>
+    <dialog
+        android:id="@+id/addItemToBuyFragment"
+        android:name="com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment"
+        android:label="fragment_add_item_to_buy"
+        tools:layout="@layout/fragment_add_item_to_buy" >
+        <action
+            android:id="@+id/navigate_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+        <argument
+            android:name="dateToBuyItem"
+            app:argType="long" />
+    </dialog>
 </navigation>
