@@ -1,12 +1,12 @@
 package com.example.dailyexpenses.ui.main.tabs.diagram
 
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.data.DiagramData
-import com.example.dailyexpenses.data.ItemToBuy
+import com.example.dailyexpenses.data.HistogramData
 import com.example.dailyexpenses.repository.ExpensesRepository
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -15,18 +15,25 @@ class DiagramViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
 
-    val dataForDiagram = MutableLiveData<List<DiagramData>>()
+    private val _dataForHistogram = MutableLiveData<List<HistogramData>>()
+    val dataForHistogram: LiveData<List<HistogramData>> = _dataForHistogram
 
-//    fun createChild(child: Child){
-//        viewModelScope.launch {
-//            expensesRepository.getRemoteDataSource().createChild(child)
-//        }
-//    }
+    private val _dataForDiagram = MutableLiveData<List<DiagramData>>()
+    val dataForDiagram: LiveData<List<DiagramData>> = _dataForDiagram
+
+
+    fun getDataForHistogram(fromDate: Long, toDate: Long){
+        viewModelScope.launch {
+            expensesRepository.getItemToBuyDao().getAllItemsInRange(fromDate, toDate).collect {
+                _dataForHistogram.postValue(it)
+            }
+        }
+    }
 
     fun getDataForDiagram(fromDate: Long, toDate: Long){
         viewModelScope.launch {
-            expensesRepository.getItemToBuyDao().getAllItemsInRange(fromDate, toDate).collect {
-                dataForDiagram.postValue(it)
+            expensesRepository.getItemToBuyDao().getAllItemsByCategory(fromDate, toDate).collect {
+                _dataForDiagram.postValue(it)
             }
         }
     }

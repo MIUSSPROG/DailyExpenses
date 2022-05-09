@@ -1,30 +1,22 @@
 package com.example.dailyexpenses.ui.main.tabs.diagram
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.dailyexpenses.R
-import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.data.DiagramData
-import com.example.dailyexpenses.data.ItemToBuy
+import com.example.dailyexpenses.data.HistogramData
 import com.example.dailyexpenses.databinding.FragmentDiagramBinding
-import com.example.dailyexpenses.ui.main.tabs.dashboard.DashboardViewModel
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDate
 import com.example.dailyexpenses.utils.XAxisDateFormatter
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
-import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet
+import com.github.mikephil.charting.components.LegendEntry
+import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.SimpleDateFormat
-import java.util.*
 
 @AndroidEntryPoint
 class DiagramFragment : Fragment(R.layout.fragment_diagram) {
@@ -44,21 +36,38 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
 
         binding.btnSetDateRange.setOnClickListener { showDateRange() }
 
+        viewModel.dataForHistogram.observe(viewLifecycleOwner){
+            showBarChart(it)
+        }
 
         viewModel.dataForDiagram.observe(viewLifecycleOwner){
-            showBarChart(it)
+            showPieChart(it)
         }
 
         return binding.root
     }
 
-    private fun showBarChart(data: List<DiagramData>){
+    private fun showPieChart(data: List<DiagramData>){
+        val entries = mutableListOf<PieEntry>()
+        data.forEach { diagramData ->
+            entries.add(PieEntry(diagramData.categoryId.toFloat(), diagramData.sumPrice))
+        }
+        val pieDataset = PieDataSet(entries, "PieCells")
+        pieDataset.colors = ColorTemplate.MATERIAL_COLORS.toList()
+        val pieData = PieData(pieDataset)
+//        pieData.setValueFormatter(PieAxisCategoryNameFormatter())
+        binding.itemsToBuyPieChart.data = pieData
+        binding.itemsToBuyPieChart.animateY(1000)
+        binding.itemsToBuyPieChart.invalidate()
+    }
+
+    private fun showBarChart(data: List<HistogramData>){
         val entries = mutableListOf<BarEntry>()
         val dayStart = convertMillisToDate(firstDateUnixMillis).split("/")[0].toFloat()
         val dayEnd = convertMillisToDate(secondDateUnixMillis).split("/")[0].toFloat()
         entries.add(BarEntry(dayStart, 0f))
         entries.add(BarEntry(dayEnd, 0f))
-        data.forEachIndexed { index, diagramData ->
+        data.forEach{ diagramData ->
             val day = convertMillisToDate(diagramData.date).split("/")[0].toFloat()
             entries.add(BarEntry(day, diagramData.sumPrice))
         }
@@ -88,6 +97,7 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
             secondDateUnixMillis = datePicked.second
             val startDate = convertMillisToDate(firstDateUnixMillis)
             val endDate = convertMillisToDate(secondDateUnixMillis)
+            viewModel.getDataForHistogram(firstDateUnixMillis, secondDateUnixMillis)
             viewModel.getDataForDiagram(firstDateUnixMillis, secondDateUnixMillis)
             binding.tvDateRange.text = "$startDate - $endDate"
         }

@@ -157,19 +157,23 @@ class DashboardViewModel @ViewModelInject constructor(
             )
             plansForApproval.add(plan)
         }
-        val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
-        when(response){
-            is ApiResponse.Success -> {
-                itemsToBuyFromDB.forEach {
-                    expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+        if (plansForApproval.size != 0) {
+            val response =
+                expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
+            when (response) {
+                is ApiResponse.Success -> {
+                    itemsToBuyFromDB.forEach {
+                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+                    }
+                    plansChannel.send(DashboardUiState.Success<Nothing>())
                 }
-//                _plansFlow.value = LoginUiState.Success
-                plansChannel.send(DashboardUiState.Success<Nothing>())
+                is ApiResponse.Error -> {
+                    plansChannel.send(DashboardUiState.Error("Некорректные данные"))
+                }
             }
-            is ApiResponse.Error -> {
-//                _plansFlow.value = LoginUiState.Error("Некорректные данные")
-                plansChannel.send(DashboardUiState.Error("Некорректные данные"))
-            }
+        }
+        else{
+            plansChannel.send(DashboardUiState.Error("Все данные уже были отправлены"))
         }
     }
 

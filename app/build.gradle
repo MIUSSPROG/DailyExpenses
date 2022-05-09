@@ -94,6 +94,8 @@ dependencies {
 //     Customizable CalendarView - календарь с множеством кастомизаций
     implementation 'com.applandeo:material-calendar-view:1.7.0'
 
+    // Swipe to refresh layout
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
 
 //    implementation group: 'at.favre.lib', name: 'bcrypt', version: '0.9.0'
 

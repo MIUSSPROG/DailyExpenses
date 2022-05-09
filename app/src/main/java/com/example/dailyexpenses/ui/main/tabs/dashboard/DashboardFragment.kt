@@ -20,6 +20,8 @@ import com.example.dailyexpenses.R
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.data.ItemsToBuyAdapter
 import com.example.dailyexpenses.databinding.FragmentDashboardBinding
+import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.EXTRA_DATE_SELECTED
+import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.REQUEST_CODE
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDateMills
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -72,6 +74,11 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
             }
 
+            parentFragmentManager.setFragmentResultListener(REQUEST_CODE, viewLifecycleOwner){ _, data ->
+                selectedDateUnix = data.getLong(EXTRA_DATE_SELECTED)
+                viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+            }
+
             btnAddItem.setOnClickListener{
                 val action = DashboardFragmentDirections.navigateToAddItemToBuyFragment(selectedDateUnix)
                 findNavController().navigate(action)
@@ -84,6 +91,12 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
             btnSendParentToConfirm.setOnClickListener {
                 viewModel.sendItemToBuyForParentApproval(selectedDateUnix)
+            }
+
+            swipeToRefresh.setColorSchemeColors(resources.getColor(R.color.color1))
+            swipeToRefresh.setOnRefreshListener {
+                viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+                swipeToRefresh.isRefreshing = false
             }
         }
 

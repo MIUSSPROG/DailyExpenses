@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -24,7 +25,7 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
     private val viewModel: AddItemToBuyViewModel by viewModels()
     private lateinit var categories: List<Category>
     private var selectedCategory: Category? = null
-    val args: AddItemToBuyFragmentArgs by navArgs()
+    private val args: AddItemToBuyFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,7 +44,6 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
                 etCategories.setAdapter(adapter)
             }
 
-
             etCategories.setOnItemClickListener { adapterView, view, position, id ->
                 selectedCategory = categories[position]
             }
@@ -56,10 +56,11 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
                 if (selectedCategory != null && plan.isNotBlank() && sumToBuy.isNotBlank()){
                     val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = args.dateToBuyItem, category = selectedCategory!!.name, categoryId = selectedCategory!!.id, confirm = null)
                     viewModel.saveItemToBuy(itemToBuy)
-                    val action = AddItemToBuyFragmentDirections.navigateToDashboardFragment(args.dateToBuyItem)
-                    findNavController().navigate(action)
-//                    Toast.makeText(requireContext(), "элемент $itemToBuy успешно сохранен!", Toast.LENGTH_SHORT).show()
-//                    dismiss()
+//                    val action = AddItemToBuyFragmentDirections.navigateToDashboardFragment(args.dateToBuyItem)
+//                    findNavController().navigate(action)
+//                    Toast.makeText(requireContext(), "успешно сохранен!", Toast.LENGTH_SHORT).show()
+                    parentFragmentManager.setFragmentResult(REQUEST_CODE, bundleOf(EXTRA_DATE_SELECTED to args.dateToBuyItem))
+                    dismiss()
                 }
                 else{
                     Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
@@ -68,6 +69,11 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
         }
 
         return binding.root
+    }
+
+    companion object{
+        const val REQUEST_CODE = "SAVE_ITEM_REQUEST_CODE"
+        const val EXTRA_DATE_SELECTED = "EXTRA_DATE_SELECTED"
     }
 
 }

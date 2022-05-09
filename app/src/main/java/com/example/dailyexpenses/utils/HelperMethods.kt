@@ -23,6 +23,12 @@ class HelperMethods {
     }
 }
 
+//class PieAxisCategoryNameFormatter: ValueFormatter(){
+//    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
+//        return
+//    }
+//}
+
 class XAxisDateFormatter: ValueFormatter(){
     override fun getAxisLabel(value: Float, axis: AxisBase?): String {
         val tmp =  HelperMethods.convertMillisToDate(HelperMethods.convertMillisToDateMills(value.toLong())).split('/')[0]
