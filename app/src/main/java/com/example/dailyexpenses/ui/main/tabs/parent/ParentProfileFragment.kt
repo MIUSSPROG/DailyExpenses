@@ -13,9 +13,8 @@ import com.example.dailyexpenses.data.ChildrenListActionListener
 import com.example.dailyexpenses.data.ChildrenListAdapter
 import com.example.dailyexpenses.databinding.FragmentParentProfileBinding
 import com.example.dailyexpenses.utils.findTopNavController
-import com.example.dailyexpensespredprof.utils.prefs
+import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
-import okhttp3.internal.notify
 
 @AndroidEntryPoint
 class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {

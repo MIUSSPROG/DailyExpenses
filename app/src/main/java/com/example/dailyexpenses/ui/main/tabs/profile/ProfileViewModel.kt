@@ -1,28 +1,20 @@
 package com.example.dailyexpenses.ui.main.tabs.profile
 
-import android.util.Log
-import android.widget.Toast
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.api.*
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.utils.Constants
-import com.example.dailyexpensespredprof.utils.prefs
+import com.example.dailyexpenses.utils.prefs
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 import retrofit2.Response
-import java.io.IOException
 
 class ProfileViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository

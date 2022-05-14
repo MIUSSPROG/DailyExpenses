@@ -40,8 +40,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ChildrenInputLayout" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChildPlans"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeToRefreshParent"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="1dp"
@@ -51,8 +51,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switchStatus"
+        app:layout_constraintTop_toBottomOf="@+id/switchStatus">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChildPlans"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
         tools:listitem="@layout/rv_item_child_plan" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <Switch
         android:id="@+id/switchStatus"

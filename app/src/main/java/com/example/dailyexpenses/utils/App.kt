@@ -1,9 +1,5 @@
-package com.example.dailyexpensespredprof.utils
+package com.example.dailyexpenses.utils
 import android.app.Application
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.os.Build
-import com.example.dailyexpenses.utils.Prefs
 import dagger.hilt.android.HiltAndroidApp
 
 

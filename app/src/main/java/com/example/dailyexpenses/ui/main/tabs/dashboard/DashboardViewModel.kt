@@ -7,17 +7,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.applandeo.materialcalendarview.EventDay
+import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.ApiResponse
 import com.example.dailyexpenses.api.Plan
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.utils.HelperMethods
-import com.example.dailyexpensespredprof.utils.prefs
+import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.receiveAsFlow
 import java.lang.Exception
 import java.util.*
@@ -38,11 +38,14 @@ class DashboardViewModel @ViewModelInject constructor(
     private val plansChannel = Channel<DashboardUiState>()
     val plansChannelFlow = plansChannel.receiveAsFlow()
 
-    private val _childPlansFromServer = MutableLiveData<List<Plan>>()
-    val childPlansFromServer: LiveData<List<Plan>> = _childPlansFromServer
+    private val _calendarEvents = MutableLiveData<List<EventDay>>()
+    val calendarEvents: LiveData<List<EventDay>> = _calendarEvents
 
     private val _itemsToBuy = MutableLiveData<DashboardUiState>(DashboardUiState.Empty)
     val itemsToBuy: LiveData<DashboardUiState> = _itemsToBuy
+
+    private val _deletedItem = MutableLiveData<DashboardUiState>(DashboardUiState.Empty)
+    val deletedItem: LiveData<DashboardUiState> = _deletedItem
 
     fun getItemsToBuy(pickedDate: Long){
         viewModelScope.launch(Dispatchers.IO) {
@@ -80,60 +83,64 @@ class DashboardViewModel @ViewModelInject constructor(
 //        }
 //    }
 
-    fun setCalendarEvents(){
+    fun setCalendarEvents(curMonth: Int){
         viewModelScope.launch {
             try {
                 val events = mutableListOf<EventDay>()
                 val calendar = Calendar.getInstance()
                 val todayDay = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[0].toInt()
 
-                val plansFromServerDeffered = async{
-                    expensesRepository.getRemoteDataSource().getChildPlans(prefs.id)
-                }
+                val plansFromDB = expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
 
-                val plansFromDBDeffered = async{
-                    expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
-                }
+                if (plansFromDB.isNotEmpty()) {
+                    var plansFromDbGroupByDate = mutableMapOf<Int, MutableList<ItemToBuy>>()
 
-                val plansFromServer = plansFromServerDeffered.await().body()?.plans!!.filter { it.confirm != null }
-                val plansFromDB = plansFromDBDeffered.await()
-
-                if (plansFromServer.isNotEmpty() && plansFromDB.isNotEmpty()) {
-                    plansFromServer?.forEach { serverPlan ->
-                        val planExist = plansFromDB.firstOrNull{plan -> plan.id == serverPlan.dbId}
-                        if (planExist != null){
-                            if (serverPlan.confirm != null){
-                                expensesRepository.getItemToBuyDao().update(planExist.copy(confirm = serverPlan.confirm))
+                    plansFromDB.forEach { plan ->
+                        val month = HelperMethods.convertMillisToDate(plan.date).split('/')[1].toInt()
+                        val date = HelperMethods.convertMillisToDate(plan.date).split('/')[0].toInt()
+                        if (month == curMonth) {
+                            if (plansFromDbGroupByDate[date] == null) {
+                                plansFromDbGroupByDate[date] = mutableListOf()
+                                plansFromDbGroupByDate[date]!!.add(plan)
+                            } else {
+                                plansFromDbGroupByDate[date]!!.add(plan)
                             }
                         }
                     }
-//                    var plansFromServerGroupByDate = mutableMapOf<Long, MutableList<Plan>>()
-//                    var plansFromDbGroupByDate = mutableMapOf<Long, MutableList<Plan>>()
-//
-//                    plansFromDB.forEach { plan ->
-//                        val date = plan.date
-//                        if (plansFromDbGroupByDate[date] == null){
-//                            plansFromDbGroupByDate[date] = mutableListOf()
-//                            plansFromDbGroupByDate[date]!!.add(plan.convertToDbPlan(prefs.id))
-//                        }else{
-//                            plansFromDbGroupByDate[date]!!.add(plan.convertToDbPlan(prefs.id))
-//                        }
-//                    }
-//
-//                    plansFromServer.body()?.plans?.forEach { plan ->
-//                        val date = plan.date
-//                        if (plansFromServerGroupByDate[date] == null) {
-//                            plansFromServerGroupByDate[date] = mutableListOf()
-//                            plansFromServerGroupByDate[date]!!.add(plan)
-//                        } else {
-//                            plansFromServerGroupByDate[date]!!.add(plan)
-//                        }
-//                    }
+
+                    plansFromDbGroupByDate.forEach {
+                        val calendar = Calendar.getInstance()
+                        calendar.add(Calendar.DAY_OF_MONTH, it.key - todayDay)
+                        var confirmed = 0
+                        var rejected = 0
+                        var send = 0
+                        it.value.forEach { itemToBuy ->
+                            if (itemToBuy.confirm == true){
+                                confirmed ++
+                            }
+                            else if (itemToBuy.confirm == false){
+                                rejected ++
+                            }
+                            else if (itemToBuy.send){
+                                send ++
+                            }
+                        }
+                        if (confirmed == it.value.size){
+                            events.add(EventDay(calendar, R.drawable.ic_done))
+                        }
+                        else if (rejected > 0){
+                            events.add(EventDay(calendar, R.drawable.ic_cancel))
+                        }
+                        else if (send > 0){
+                            events.add(EventDay(calendar, R.drawable.ic_sync))
+                        }
+                        else{
+                            events.add(EventDay(calendar, R.drawable.ic_priority))
+                        }
+                    }
+                    _calendarEvents.postValue(events)
 //                    Log.d("Data DB: ", plansFromDbGroupByDate.toString())
-//                    Log.d("Data Server: ", plansFromServerGroupByDate.toString())
-//                    Log.d("Data Comparison: ",
-//                        (plansFromDbGroupByDate == plansFromServerGroupByDate).toString()
-//                    )
+
 //            _childPlansFromServer.postValue(response.body()?.plans)
                 }
             }catch (ex: Exception){
@@ -211,9 +218,17 @@ class DashboardViewModel @ViewModelInject constructor(
 
     fun deleteItem(itemToBuy: ItemToBuy){
         viewModelScope.launch {
-            coroutineScope {
-                expensesRepository.getItemToBuyDao().delete(itemToBuy)
-                expensesRepository.getRemoteDataSource().deletePlan(prefs.id)
+            expensesRepository.getItemToBuyDao().delete(itemToBuy)
+            if (itemToBuy.send) {
+                val response = expensesRepository.getRemoteDataSource().deletePlan(prefs.id)
+                when(response){
+                    is ApiResponse.Success -> {
+                        _deletedItem.postValue(DashboardUiState.Success<Nothing>())
+                    }
+                    is ApiResponse.Error -> {
+                        _deletedItem.postValue(DashboardUiState.Error("Ошибка"))
+                    }
+                }
             }
         }
     }

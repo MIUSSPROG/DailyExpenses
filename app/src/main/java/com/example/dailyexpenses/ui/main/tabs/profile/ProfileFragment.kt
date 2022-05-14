@@ -1,27 +1,19 @@
 package com.example.dailyexpenses.ui.main.tabs.profile
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navOptions
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.ChildParent
 import com.example.dailyexpenses.api.Parent
-import com.example.dailyexpenses.data.ParentSearchAdapter
 import com.example.dailyexpenses.databinding.FragmentProfileBinding
-import com.example.dailyexpenses.ui.main.tabs.dashboard.DashboardViewModel
 import com.example.dailyexpenses.utils.findTopNavController
-import com.example.dailyexpensespredprof.utils.prefs
+import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import retrofit2.http.HTTP
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -101,7 +93,6 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 }
             })
         }
-
     }
 
     private fun pinParent(childParent: ChildParent){

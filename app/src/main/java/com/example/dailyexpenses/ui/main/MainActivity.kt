@@ -13,9 +13,8 @@ import com.example.dailyexpenses.R
 import com.example.dailyexpenses.databinding.ActivityMainBinding
 import com.example.dailyexpenses.ui.main.auth.SignInViewModel.Companion.PARENT_ROLE
 import com.example.dailyexpenses.ui.main.tabs.TabsFragment
-import com.example.dailyexpensespredprof.utils.prefs
+import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
-import java.lang.IllegalStateException
 import java.util.regex.Pattern
 
 @AndroidEntryPoint
@@ -114,6 +113,21 @@ class MainActivity : AppCompatActivity() {
         }
         matcher.appendTail(title)
         return title.toString()
+    }
+
+    override fun onBackPressed() {
+        if (isStartDestination(navController?.currentDestination)){
+            super.onBackPressed()
+        }else{
+            navController?.popBackStack()
+        }
+
+    }
+
+    override fun onDestroy() {
+        supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
+        navController = null
+        super.onDestroy()
     }
 
     private fun isSignedIn(): Boolean {

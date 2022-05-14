@@ -10,8 +10,8 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.ui.main.MainActivity
-import com.example.dailyexpensespredprof.utils.App.Companion.CHANNEL_ID
-import com.example.dailyexpensespredprof.utils.App.Companion.CHANNEL_NAME
+import com.example.dailyexpenses.utils.App.Companion.CHANNEL_ID
+import com.example.dailyexpenses.utils.App.Companion.CHANNEL_NAME
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 

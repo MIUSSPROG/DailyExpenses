@@ -3,6 +3,9 @@ package com.example.dailyexpenses.repository
 import com.example.dailyexpenses.api.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.Response
+import okhttp3.ResponseBody
 import retrofit2.HttpException
 import retrofit2.Retrofit
 import java.io.IOException
@@ -94,7 +97,16 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         }
     }
 
-    suspend fun deletePlan(childId: Int) = serviceApi.deletePlan(childId)
+    suspend fun deletePlan(planId: Int): ApiResponse<Int>{
+        return try {
+            val response = serviceApi.deletePlan(planId)
+            ApiResponse.Success(data = response.code)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun sendInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.sendInvitation(id, childInvitation)
 

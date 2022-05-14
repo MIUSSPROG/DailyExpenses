@@ -6,10 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.api.*
 import com.example.dailyexpenses.repository.ExpensesRepository
-import com.example.dailyexpensespredprof.utils.prefs
-import kotlinx.coroutines.async
+import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 class ParentDashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository

@@ -2,6 +2,7 @@ package com.example.dailyexpenses.api
 
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -72,7 +73,7 @@ interface ServiceApi {
     suspend fun sendPlansForApproval(@Body plans: List<Plan>): Response<List<Plan>>
 
     @DELETE("api/v1/plan/{id}/destroy")
-    suspend fun deletePlan(@Path("id") id: Int): ResponseBody
+    suspend fun deletePlan(@Path("id") id: Int): okhttp3.Response
 
     @GET("api/v1/child/{id}/plans")
     suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>

@@ -47,6 +47,18 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
                     selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked) }
                 }
             }
+
+            swipeToRefreshParent.setOnRefreshListener {
+                swipeToRefreshParent.setColorSchemeColors(resources.getColor(R.color.color1))
+                if (switchStatus.isEnabled){
+                    selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked) }
+                    swipeToRefreshParent.isRefreshing = false
+                }
+                else {
+                    selectedChild?.let { viewModel.getChildrenPlans(it.id) }
+                    swipeToRefreshParent.isRefreshing = false
+                }
+            }
         }
 
         childPlanAdapter = ChildPlanAdapter(object : ChildPlanActionListener {

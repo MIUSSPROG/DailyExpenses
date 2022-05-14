@@ -11,9 +11,7 @@ import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.databinding.FragmentSignUpBinding
-import com.example.dailyexpensespredprof.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.math.log
 
 @AndroidEntryPoint
 class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
