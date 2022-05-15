@@ -139,9 +139,6 @@ class DashboardViewModel @ViewModelInject constructor(
                         }
                     }
                     _calendarEvents.postValue(events)
-//                    Log.d("Data DB: ", plansFromDbGroupByDate.toString())
-
-//            _childPlansFromServer.postValue(response.body()?.plans)
                 }
             }catch (ex: Exception){
                 Log.d("Error", ex.message.toString())
@@ -169,8 +166,9 @@ class DashboardViewModel @ViewModelInject constructor(
                 expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
             when (response) {
                 is ApiResponse.Success -> {
-                    itemsToBuyFromDB.forEach {
-                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+                    val sendedPlans = response.data
+                    itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
+                        expensesRepository.getItemToBuyDao().update(item.copy(send = true, remoteDbId = sendedPlans[index].id))
                     }
                     plansChannel.send(DashboardUiState.Success<Nothing>())
                 }
@@ -184,43 +182,43 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
-    fun sendItemToBuyToParentApproval(pickedDate: Long){
-        viewModelScope.launch {
-            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
-            val plansForApproval = mutableListOf<Plan>()
-
-            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
-                val plan = Plan(name = item.name,
-                    price = item.price,
-                    date = item.date,
-                    confirm = item.confirm,
-                    categoryId = item.categoryId,
-                    childId = prefs.id,
-                    dbId = item.id,
-                )
-                plansForApproval.add(plan)
-            }
-            val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
-            when(response){
-                is ApiResponse.Success -> {
-                    itemsToBuyFromDB.forEach {
-                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
-                    }
-                    _plansLiveData.postValue(response.data!!)
-                }
-                is ApiResponse.Error -> {
-                    _plansLiveData.postValue(400)
-                }
-            }
-
-        }
-    }
+//    fun sendItemToBuyToParentApproval(pickedDate: Long){
+//        viewModelScope.launch {
+//            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
+//            val plansForApproval = mutableListOf<Plan>()
+//
+//            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
+//                val plan = Plan(name = item.name,
+//                    price = item.price,
+//                    date = item.date,
+//                    confirm = item.confirm,
+//                    categoryId = item.categoryId,
+//                    childId = prefs.id,
+//                    dbId = item.id,
+//                )
+//                plansForApproval.add(plan)
+//            }
+//            val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
+//            when(response){
+//                is ApiResponse.Success -> {
+//                    itemsToBuyFromDB.forEach {
+//                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
+//                    }
+//                    _plansLiveData.postValue(response.data!!)
+//                }
+//                is ApiResponse.Error -> {
+//                    _plansLiveData.postValue(400)
+//                }
+//            }
+//
+//        }
+//    }
 
     fun deleteItem(itemToBuy: ItemToBuy){
         viewModelScope.launch {
             expensesRepository.getItemToBuyDao().delete(itemToBuy)
             if (itemToBuy.send) {
-                val response = expensesRepository.getRemoteDataSource().deletePlan(prefs.id)
+                val response = expensesRepository.getRemoteDataSource().deletePlan(itemToBuy.remoteDbId!!)
                 when(response){
                     is ApiResponse.Success -> {
                         _deletedItem.postValue(DashboardUiState.Success<Nothing>())

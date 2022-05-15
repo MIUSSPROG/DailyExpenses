@@ -47,18 +47,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     ): View? {
         binding = FragmentDashboardBinding.inflate(layoutInflater, container, false)
 
-//        val events = mutableListOf<EventDay>()
-//        val calendar = Calendar.getInstance()
-//        val todayDay = convertMillisToDate(calendar.timeInMillis).split('/')[0].toInt()
-//        val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-//        val calendar1 = Calendar.getInstance()
-//        calendar1.add(Calendar.DAY_OF_MONTH, 2)
-//        val calendar2 = Calendar.getInstance()
-//        calendar2.add(Calendar.DAY_OF_MONTH, lastDay-todayDay)
-//        events.add(EventDay(calendar1, R.drawable.ic_question))
-//        events.add(EventDay(calendar, R.drawable.ic_done))
-//        events.add(EventDay(calendar2, R.drawable.ic_done))
-//        binding.calendarViewPlan.setEvents(events)
 
         binding.apply {
 
@@ -67,7 +55,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             viewModel.setCalendarEvents(curMonth)
             viewModel.calendarEvents.observe(viewLifecycleOwner){
                 calendarViewPlan.setEvents(it)
-//                calendarViewPlan.invalidate()
             }
 
             selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis)
@@ -84,7 +71,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                 viewLifecycleOwner
             ) { _, data ->
                 selectedDateUnix = data.getLong(EXTRA_DATE_SELECTED)
-                viewModel.setCalendarEvents(curMonth)
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
             }
 
@@ -97,13 +83,11 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
             btnSendParentToConfirm.setOnClickListener {
                 viewModel.sendItemToBuyForParentApproval(selectedDateUnix)
-                viewModel.setCalendarEvents(curMonth)
             }
 
             swipeToRefresh.setColorSchemeColors(resources.getColor(R.color.color1))
             swipeToRefresh.setOnRefreshListener {
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
-                viewModel.setCalendarEvents(curMonth)
                 swipeToRefresh.isRefreshing = false
             }
         }
@@ -112,6 +96,9 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             when (it) {
                 is DashboardViewModel.DashboardUiState.Success<*> -> {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
+                    val calendar = Calendar.getInstance()
+                    val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
+                    viewModel.setCalendarEvents(curMonth)
                 }
                 is DashboardViewModel.DashboardUiState.Error -> {
                     Toast.makeText(
@@ -135,6 +122,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                                 "Данные успешно отправлены на согласование!",
                                 Toast.LENGTH_SHORT
                             ).show()
+                            viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                         }
                         is DashboardViewModel.DashboardUiState.Error -> {
                             Toast.makeText(
@@ -148,74 +136,11 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             }
         }
 
-//        lifecycleScope.launch {
-//
-//            viewModel.itemsToBuy.collect {
-//                when(it){
-//                    is DashboardViewModel.LoginUiState.Success<*> -> {
-//                        itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
-//                    }
-//                    is DashboardViewModel.LoginUiState.Error -> {
-//                        Toast.makeText(requireContext(), "Не удалось получить данные!", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//
-//            viewModel.plansChannelFlow.collect {
-//                when(it){
-//                    is DashboardViewModel.LoginUiState.Success<*> -> {
-////                        viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
-//                        Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
-//                    }
-//                    is DashboardViewModel.LoginUiState.Error -> {
-//                        Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
-//            }
-//        }
-
-//        viewModel.plansLiveData.observe(viewLifecycleOwner){ response ->
-//            if (response == 400){
-//                Toast.makeText(requireContext(), "Данные уже были отправлены!", Toast.LENGTH_SHORT).show()
-//            }
-//            else {
-//                Toast.makeText(requireContext(), "Данные успешно отправлены на согласование!", Toast.LENGTH_SHORT).show()
-//            }
-//        }
 
         setupRecyclerViewSwipeToDelete()
         return binding.root
     }
 
-//    private fun setCalendarEvents(){
-//        val events = mutableListOf<EventDay>()
-//        val calendar = Calendar.getInstance()
-//        val todayDay = convertMillisToDate(calendar.timeInMillis).split('/')[0].toInt()
-//        val lastDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
-
-//        viewModel.getItemsFromServer()
-//        viewModel.childPlansFromServer.observe(viewLifecycleOwner){ plans ->
-//            var planGroupByDate = mutableMapOf<String, MutableList<Plan>>()
-//            plans.forEach { plan ->
-//                val date = convertMillisToDate(plan.date)
-//                if (planGroupByDate[date] == null){
-//                    planGroupByDate[date] = mutableListOf()
-//                    planGroupByDate[date]!!.add(plan)
-//                }else{
-//                    planGroupByDate[date]!!.add(plan)
-//                }
-//                val calendar = Calendar.getInstance()
-//                val curDay = convertMillisToDate(plan.date).split('/')[0].toInt()
-//                calendar.add(Calendar.DAY_OF_MONTH, curDay-todayDay)
-//                (plan.confirm).let {
-//                    if (it == true){
-//
-//                    }
-//                }
-//                events.add(EventDay(calendar, R.drawable.ic_question))
-//            }
-//        }
-//    }
 
     private fun setupRecyclerViewSwipeToDelete() {
         binding.rvDateItems.apply {
@@ -228,6 +153,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             when(it){
                 is DashboardViewModel.DashboardUiState.Success<*> -> {
                     Toast.makeText(requireContext(), "Элемент удален!", Toast.LENGTH_SHORT).show()
+                    viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                 }
                 is DashboardViewModel.DashboardUiState.Error -> {
                     Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()

@@ -62,10 +62,10 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
 //    suspend fun createPlan(plan: Plan) = serviceApi.createPlan(plan.name, plan.price, plan.date, plan.confirm, plan.categoryId, plan.childId, plan.image)
 
-    suspend fun sendPlansForApproval(plans: List<Plan>): ApiResponse<Int>{
+    suspend fun sendPlansForApproval(plans: List<Plan>): ApiResponse<List<Plan>>{
         return try {
             val response = serviceApi.sendPlansForApproval(plans)
-            ApiResponse.Success(data = response.code())
+            ApiResponse.Success(data = response.body()!!)
         }catch (e: HttpException){
             ApiResponse.Error(exception = e)
         }catch (e: IOException){
@@ -99,8 +99,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun deletePlan(planId: Int): ApiResponse<Int>{
         return try {
-            val response = serviceApi.deletePlan(planId)
-            ApiResponse.Success(data = response.code)
+            serviceApi.deletePlan(planId)
+            ApiResponse.Success(data = 204)
         }catch (e: HttpException){
             ApiResponse.Error(exception = e)
         }catch (e: IOException){

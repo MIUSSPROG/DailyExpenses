@@ -13,6 +13,8 @@ import com.example.dailyexpenses.api.PlanRV
 import com.example.dailyexpenses.data.ChildPlanActionListener
 import com.example.dailyexpenses.data.ChildPlanAdapter
 import com.example.dailyexpenses.databinding.FragmentParentDashboardBinding
+import com.example.dailyexpenses.utils.HelperMethods
+import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,12 +25,34 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
     private lateinit var children: List<Child>
     private var selectedChild: Child? = null
     private lateinit var childPlanAdapter: ChildPlanAdapter
+    private var firstDateUnixMillis: Long = 0
+    private var secondDateUnixMillis: Long = 0
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding = FragmentParentDashboardBinding.bind(view)
         binding.apply {
+
+            btnChoosePeriod.setOnClickListener {
+                val dateRangePicker = MaterialDatePicker.Builder
+                    .dateRangePicker()
+                    .setTitleText("Выберите диапазон")
+                    .build()
+
+                dateRangePicker.show(
+                    parentFragmentManager, "date_range_picker"
+                )
+
+                dateRangePicker.addOnPositiveButtonClickListener { datePicked ->
+                    firstDateUnixMillis = datePicked.first
+                    secondDateUnixMillis = datePicked.second
+                    val startDate = HelperMethods.convertMillisToDate(firstDateUnixMillis)
+                    val endDate = HelperMethods.convertMillisToDate(secondDateUnixMillis)
+                    tvDateRangeParent.text = "$startDate - $endDate"
+                }
+            }
+
             switchStatus.setOnClickListener {
                 if (switchStatus.isChecked) {
                     switchStatus.text = "одобренные"

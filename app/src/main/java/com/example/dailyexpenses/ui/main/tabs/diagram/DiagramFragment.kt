@@ -19,20 +19,16 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class DiagramFragment : Fragment(R.layout.fragment_diagram) {
+class DiagramFragment: Fragment(R.layout.fragment_diagram) {
 
     private lateinit var binding: FragmentDiagramBinding
     private val viewModel: DiagramViewModel by viewModels()
     private var firstDateUnixMillis: Long = 0
     private var secondDateUnixMillis: Long = 0
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        binding = FragmentDiagramBinding.inflate(layoutInflater, container, false)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding = FragmentDiagramBinding.bind(view)
 
         binding.btnSetDateRange.setOnClickListener { showDateRange() }
 
@@ -43,8 +39,6 @@ class DiagramFragment : Fragment(R.layout.fragment_diagram) {
         viewModel.dataForDiagram.observe(viewLifecycleOwner){
             showPieChart(it)
         }
-
-        return binding.root
     }
 
     private fun showPieChart(data: List<DiagramData>){

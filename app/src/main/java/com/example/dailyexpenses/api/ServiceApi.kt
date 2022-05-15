@@ -73,7 +73,7 @@ interface ServiceApi {
     suspend fun sendPlansForApproval(@Body plans: List<Plan>): Response<List<Plan>>
 
     @DELETE("api/v1/plan/{id}/destroy")
-    suspend fun deletePlan(@Path("id") id: Int): okhttp3.Response
+    suspend fun deletePlan(@Path("id") id: Int): Response<Unit>
 
     @GET("api/v1/child/{id}/plans")
     suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>

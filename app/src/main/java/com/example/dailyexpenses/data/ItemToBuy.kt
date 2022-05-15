@@ -16,7 +16,8 @@ data class ItemToBuy(
     val price: Float,
     val date: Long,
     val confirm: Boolean?,
-    val send: Boolean = false
+    val send: Boolean = false,
+    val remoteDbId: Int? = null
 ) {
     fun convertToDbPlan(childId: Int)  =
         Plan(
