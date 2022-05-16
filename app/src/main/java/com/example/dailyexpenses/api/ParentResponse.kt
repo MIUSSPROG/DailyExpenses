@@ -1,5 +1,7 @@
 package com.example.dailyexpenses.api
 
+import com.google.gson.annotations.SerializedName
+
 data class Parent(
     val id: Int=0,
     val login: String,

@@ -34,6 +34,14 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
         binding = FragmentParentDashboardBinding.bind(view)
         binding.apply {
 
+            btnCancelPeriod.setOnClickListener {
+                firstDateUnixMillis = 0
+                secondDateUnixMillis = 0
+                tvDateRangeParent.text = ""
+                switchStatusHandle()
+                allCheckedHandle()
+            }
+
             btnChoosePeriod.setOnClickListener {
                 val dateRangePicker = MaterialDatePicker.Builder
                     .dateRangePicker()
@@ -50,36 +58,22 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
                     val startDate = HelperMethods.convertMillisToDate(firstDateUnixMillis)
                     val endDate = HelperMethods.convertMillisToDate(secondDateUnixMillis)
                     tvDateRangeParent.text = "$startDate - $endDate"
+                    switchStatusHandle()
+                    allCheckedHandle()
                 }
             }
 
-            switchStatus.setOnClickListener {
-                if (switchStatus.isChecked) {
-                    switchStatus.text = "одобренные"
-                } else {
-                    switchStatus.text = "отклоненные"
-                }
-                selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked) }
-            }
-
-            cbAllChecked.setOnClickListener {
-                if (cbAllChecked.isChecked) {
-                    switchStatus.isEnabled = false
-                    selectedChild?.let { child -> viewModel.getChildrenPlans(child.id) }
-                } else {
-                    switchStatus.isEnabled = true
-                    selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked) }
-                }
-            }
+            switchStatus.setOnClickListener { switchStatusHandle() }
+            cbAllChecked.setOnClickListener { allCheckedHandle() }
 
             swipeToRefreshParent.setOnRefreshListener {
                 swipeToRefreshParent.setColorSchemeColors(resources.getColor(R.color.color1))
                 if (switchStatus.isEnabled){
-                    selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked) }
+                    selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked, firstDateUnixMillis, secondDateUnixMillis) }
                     swipeToRefreshParent.isRefreshing = false
                 }
                 else {
-                    selectedChild?.let { viewModel.getChildrenPlans(it.id) }
+                    selectedChild?.let { viewModel.getChildrenPlans(it.id, firstDateUnixMillis, secondDateUnixMillis) }
                     swipeToRefreshParent.isRefreshing = false
                 }
             }
@@ -97,7 +91,7 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
         viewModel.planRejected.observe(viewLifecycleOwner) { planRejected ->
             if (planRejected) {
-                viewModel.getChildrenPlans(selectedChild!!.id)
+                viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
                 Toast.makeText(requireContext(), "Запрос отклонен", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Ошибка отклонения", Toast.LENGTH_SHORT).show()
@@ -106,7 +100,7 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
         viewModel.planConfirmed.observe(viewLifecycleOwner) { planConfirmed ->
             if (planConfirmed) {
-                viewModel.getChildrenPlans(selectedChild!!.id)
+                viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
                 Toast.makeText(requireContext(), "Запрос подтвержден", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Ошибка подтверждения", Toast.LENGTH_SHORT).show()
@@ -128,17 +122,60 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
         binding.actvChildrenToChoose.setOnItemClickListener { adapterView, view, position, id ->
             selectedChild = children[position]
-            viewModel.getChildrenPlans(selectedChild!!.id)
+            viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
         }
 
         viewModel.childPlans.observe(viewLifecycleOwner) {
-            childPlanAdapter.submitList(it)
+                childPlanAdapter.submitList(it)
         }
 
         binding.rvChildPlans.apply {
             adapter = childPlanAdapter
             layoutManager = LinearLayoutManager(requireContext())
             setHasFixedSize(true)
+        }
+    }
+
+    private fun allCheckedHandle() {
+        binding.apply {
+            if (cbAllChecked.isChecked) {
+                switchStatus.isEnabled = false
+                selectedChild?.let { child ->
+                    viewModel.getChildrenPlans(
+                        child.id,
+                        firstDateUnixMillis,
+                        secondDateUnixMillis
+                    )
+                }
+            } else {
+                switchStatus.isEnabled = true
+                selectedChild?.let { child ->
+                    viewModel.filterPlans(
+                        child.id,
+                        switchStatus.isChecked,
+                        firstDateUnixMillis,
+                        secondDateUnixMillis
+                    )
+                }
+            }
+        }
+    }
+
+    private fun switchStatusHandle() {
+        binding.apply {
+            if (switchStatus.isChecked) {
+                switchStatus.text = "одобренные"
+            } else {
+                switchStatus.text = "отклоненные"
+            }
+            selectedChild?.let { child ->
+                viewModel.filterPlans(
+                    child.id,
+                    switchStatus.isChecked,
+                    firstDateUnixMillis,
+                    secondDateUnixMillis
+                )
+            }
         }
     }
 

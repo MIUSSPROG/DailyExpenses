@@ -64,10 +64,9 @@ class ProfileViewModel @ViewModelInject constructor(
 
     fun cancelInvitation(){
         viewModelScope.launch {
-            val response = expensesRepository.getRemoteDataSource().cancelInvitation(prefs.id, ChildInvitation(parent = Constants.WITHOUT_PARENT, confirmed = false))
+            val response = expensesRepository.getRemoteDataSource().cancelInvitation(prefs.id, ChildInvitation(parent = null, confirmed = false))
             if (response.isSuccessful && response.body() != null) {
                 cancelInvitationLiveData.postValue(response.body())
-//                cancelInvitationStateFlow.value = response.
             }
         }
     }

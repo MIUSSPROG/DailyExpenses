@@ -60,7 +60,7 @@ class ParentDashboardViewModel @ViewModelInject constructor(
         }
     }
 
-    fun filterPlans(childId: Int, confirmed: Boolean){
+    fun filterPlans(childId: Int, confirmed: Boolean, firstUnixTime: Long, secondUnixTime: Long){
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().getFilteredPlans(confirmed, childId)
             when(response){
@@ -81,15 +81,22 @@ class ParentDashboardViewModel @ViewModelInject constructor(
                                     categoryName = it1
                                 )
                             }
-                        plansRV.add(planRV!!)
+                        if (firstUnixTime == 0L && secondUnixTime == 0L ){
+                            plansRV.add(planRV!!)
+                        }
+                        else {
+                            if (planRV!!.date in (firstUnixTime..secondUnixTime)) {
+                                plansRV.add(planRV!!)
+                            }
+                        }
                     }
-                    childPlans.postValue(plansRV)
+                    childPlans.postValue(plansRV.sortedBy { it.date })
                 }
             }
         }
     }
 
-    fun getChildrenPlans(childId: Int){
+    fun getChildrenPlans(childId: Int, firstUnixTime: Long, secondUnixTime: Long){
         viewModelScope.launch {
             val categories = expensesRepository.getRemoteDataSource().getCategories()
             val categoryMap = categories.associateBy ({it.id}, {it.name})
@@ -108,9 +115,16 @@ class ParentDashboardViewModel @ViewModelInject constructor(
                             categoryName = it1
                         )
                     }
-                plansRV.add(planRV!!)
+                    if (firstUnixTime == 0L && secondUnixTime == 0L ){
+                        plansRV.add(planRV!!)
+                    }
+                    else {
+                        if (planRV!!.date in (firstUnixTime..secondUnixTime)) {
+                            plansRV.add(planRV!!)
+                        }
+                    }
                 }
-            childPlans.postValue(plansRV)
+            childPlans.postValue(plansRV.sortedBy { it.date })
             }
         }
 }

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.dailyexpenses.api.FirebaseCloudMessagingApi
 import com.example.dailyexpenses.api.ServiceApi
 import com.example.dailyexpenses.data.ItemToBuyDatabase
+import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,6 +18,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
 import javax.inject.Singleton
+
 
 @Module
 @InstallIn(ApplicationComponent::class)
@@ -49,7 +51,7 @@ object AppModule {
 
         return Retrofit.Builder()
             .baseUrl(ServiceApi.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
             .client(okHttpClient)
             .build()
     }

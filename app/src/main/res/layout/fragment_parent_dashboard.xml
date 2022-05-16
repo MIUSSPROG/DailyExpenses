@@ -45,7 +45,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="1dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="1dp"
         android:layout_marginBottom="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -53,12 +53,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/switchStatus">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvChildPlans"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvChildPlans"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
 
-        tools:listitem="@layout/rv_item_child_plan" />
+            tools:listitem="@layout/rv_item_child_plan" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
@@ -66,12 +66,13 @@
         android:id="@+id/switchStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="15dp"
         android:checked="true"
         android:enabled="false"
         android:text="Одобренные"
+        android:visibility="visible"
         app:layout_constraintStart_toStartOf="@+id/btnChoosePeriod"
-        app:layout_constraintTop_toBottomOf="@+id/btnChoosePeriod" />
+        app:layout_constraintTop_toBottomOf="@+id/btnCancelPeriod" />
 
     <CheckBox
         android:id="@+id/cbAllChecked"
@@ -94,4 +95,15 @@
         app:layout_constraintEnd_toEndOf="@+id/ChildrenInputLayout"
         app:layout_constraintStart_toStartOf="@+id/ChildrenInputLayout"
         app:layout_constraintTop_toBottomOf="@+id/ChildrenInputLayout" />
+
+    <Button
+        android:id="@+id/btnCancelPeriod"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:backgroundTint="@color/color4"
+        android:text="Отменить период"
+        app:layout_constraintEnd_toEndOf="@+id/btnChoosePeriod"
+        app:layout_constraintStart_toStartOf="@+id/btnChoosePeriod"
+        app:layout_constraintTop_toBottomOf="@+id/btnChoosePeriod" />
 </androidx.constraintlayout.widget.ConstraintLayout>
