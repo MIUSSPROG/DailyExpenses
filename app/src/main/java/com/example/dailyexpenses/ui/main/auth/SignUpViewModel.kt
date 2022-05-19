@@ -19,11 +19,16 @@ class SignUpViewModel @ViewModelInject constructor(
     private val _childCreationLiveData = MutableLiveData<Child?>()
     val childCreationLiveData: LiveData<Child?> = _childCreationLiveData
 
+    private val _parentCreationLiveData = MutableLiveData<Parent?>()
+    val parentCreationLiveData: LiveData<Parent?> = _parentCreationLiveData
+
+    val userCreatedPairMediatorLiveData = PairMediatorLiveData(_childCreationLiveData, _parentCreationLiveData)
+
     fun createChild(child: Child){
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().createChildEncoded(child)
             when(response){
-                is ApiResponse.Success ->{
+                is ApiResponse.Success -> {
                     _childCreationLiveData.postValue(response.data!!)
                     FirebaseRepository.saveToken(child.login)
                 }
@@ -39,12 +44,27 @@ class SignUpViewModel @ViewModelInject constructor(
 
     fun createParent(parent: Parent){
         viewModelScope.launch {
-            expensesRepository.getRemoteDataSource().createParentEncoded(parent)
+            val response = expensesRepository.getRemoteDataSource().createParentEncoded(parent)
+            when(response){
+                is ApiResponse.Success -> {
+                    _parentCreationLiveData.postValue(response.data!!)
+                    FirebaseRepository.saveToken(parent.login)
+                }
+                is ApiResponse.Error -> {
+                    _parentCreationLiveData.postValue(null)
+                    Log.d("Error", response.exception.toString())
+                }
+            }
         }
         FirebaseRepository.saveToken(parent.login)
     }
 
 
-
+    class PairMediatorLiveData<F, S>(firstLiveData: LiveData<F>, secondLiveData: LiveData<S>): MediatorLiveData<Pair<F?, S?>>(){
+        init {
+            addSource(firstLiveData){ firstLiveDataValue: F -> value = firstLiveDataValue to secondLiveData.value}
+            addSource(secondLiveData){ secondLiveDataValue: S -> value = firstLiveData.value to secondLiveDataValue}
+        }
+    }
 
 }

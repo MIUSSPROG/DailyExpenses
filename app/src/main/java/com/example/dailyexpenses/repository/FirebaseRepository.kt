@@ -3,6 +3,7 @@ package com.example.dailyexpenses.repository
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.MutableLiveData
+import com.example.dailyexpenses.api.ApiResponse
 import com.google.firebase.database.*
 import com.google.firebase.messaging.FirebaseMessaging
 
@@ -22,6 +23,8 @@ class FirebaseRepository() {
                             reference.setValue(tokenMap).addOnCompleteListener{task ->
                                 Log.d("Token", token)
                             }
+                        }.addOnSuccessListener {
+                        }.addOnFailureListener {
                         }
                     }
                 }

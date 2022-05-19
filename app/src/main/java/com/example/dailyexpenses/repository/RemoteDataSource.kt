@@ -19,7 +19,16 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
 //    suspend fun createParent(parentPost: Parent) = serviceApi.createParent(parentPost)
 
-    suspend fun createParentEncoded(parentPost: Parent) = serviceApi.saveParentEncoded(parentPost)
+    suspend fun createParentEncoded(parentPost: Parent): ApiResponse<Parent>{
+        return try{
+            val response = serviceApi.saveParentEncoded(parentPost)
+            ApiResponse.Success(data = response)
+        }catch (e: HttpException){
+            ApiResponse.Error(exception = e)
+        }catch (e: IOException){
+            ApiResponse.Error(exception = e)
+        }
+    }
 
     suspend fun getParentChildren(id: Int):ApiResponse<ParentChildren>{
         return try {

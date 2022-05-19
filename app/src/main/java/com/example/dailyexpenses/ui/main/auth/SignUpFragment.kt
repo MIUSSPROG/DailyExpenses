@@ -52,13 +52,23 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
                     viewModel.createParent(parent)
                 }
 
-                viewModel.childCreationLiveData.observe(viewLifecycleOwner){ childResponse ->
-                    if (childResponse == null){
-                        Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
-                    }else{
+                viewModel.userCreatedPairMediatorLiveData.observe(viewLifecycleOwner){
+                    val child = it.first
+                    val parent = it.second
+                    if (child != null || parent != null){
                         Toast.makeText(requireContext(), "Вы успешно зарегистрированы!", Toast.LENGTH_SHORT).show()
                     }
+                    else{
+                        Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
+                    }
                 }
+//                viewModel.userCreationLiveData.observe(viewLifecycleOwner){ userResponse ->
+//                    if (userResponse == null){
+//                        Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
+//                    }else{
+//                        Toast.makeText(requireContext(), "Вы успешно зарегистрированы!", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
             }
             else{
                 Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()

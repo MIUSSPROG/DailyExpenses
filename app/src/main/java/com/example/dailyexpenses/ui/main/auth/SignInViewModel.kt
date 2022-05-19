@@ -22,8 +22,6 @@ class SignInViewModel @ViewModelInject constructor(
     private val _parentToCheck = MutableLiveData<Parent?>()
     val parentToCheck: LiveData<Parent?> = _parentToCheck
 
-    val pairMediatorLiveData = PairMediatorLiveData(_childToCheck, _parentToCheck)
-
     private val _childToCheckFlow = MutableStateFlow<LoginUiState>(LoginUiState.Empty)
     val childToCheckFlow: StateFlow<LoginUiState> = _childToCheckFlow
 
@@ -107,12 +105,6 @@ class SignInViewModel @ViewModelInject constructor(
         object Empty: LoginUiState()
     }
 
-    class PairMediatorLiveData<F, S>(firstLiveData: LiveData<F>, secondLiveData: LiveData<S>): MediatorLiveData<Pair<F?, S?>>(){
-        init {
-            addSource(firstLiveData){ firstLiveDataValue: F -> value = firstLiveDataValue to secondLiveData.value}
-            addSource(secondLiveData){ secondLiveDataValue: S -> value = firstLiveData.value to secondLiveDataValue}
-        }
-    }
 
     companion object{
         const val CHILD_ROLE = "ребенок"

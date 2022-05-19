@@ -31,7 +31,7 @@ interface ServiceApi {
     suspend fun createParent(@Body parentPost: Parent): Response<Parent>
 
     @POST("api/v1/save_parent_encoded/")
-    suspend fun saveParentEncoded(@Body parentPost: Parent): ResponseBody
+    suspend fun saveParentEncoded(@Body parentPost: Parent): Parent
 
     @GET("api/v1/parent/{id}/children")
     suspend fun getParentChildren(@Path("id") id: Int): Response<ParentChildren>
