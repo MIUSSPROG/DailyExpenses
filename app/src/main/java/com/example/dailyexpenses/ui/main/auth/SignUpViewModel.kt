@@ -6,6 +6,7 @@ import androidx.lifecycle.*
 import com.example.dailyexpenses.api.ApiResponse
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.Parent
+import com.example.dailyexpenses.data.User
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.repository.FirebaseRepository
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -17,10 +18,10 @@ class SignUpViewModel @ViewModelInject constructor(
 ): ViewModel() {
 
     private val _childCreationLiveData = MutableLiveData<Child?>()
-    val childCreationLiveData: LiveData<Child?> = _childCreationLiveData
+//    val childCreationLiveData: LiveData<Child?> = _childCreationLiveData
 
     private val _parentCreationLiveData = MutableLiveData<Parent?>()
-    val parentCreationLiveData: LiveData<Parent?> = _parentCreationLiveData
+//    val parentCreationLiveData: LiveData<Parent?> = _parentCreationLiveData
 
     val userCreatedPairMediatorLiveData = PairMediatorLiveData(_childCreationLiveData, _parentCreationLiveData)
 
@@ -31,15 +32,14 @@ class SignUpViewModel @ViewModelInject constructor(
                 is ApiResponse.Success -> {
                     _childCreationLiveData.postValue(response.data!!)
                     FirebaseRepository.saveToken(child.login)
+                    expensesRepository.getItemToBuyDao().createUser(User(response.data.id))
                 }
                 is ApiResponse.Error ->{
                     _childCreationLiveData.postValue(null)
                     Log.d("Error", response.exception.toString())
                 }
             }
-
         }
-
     }
 
     fun createParent(parent: Parent){
@@ -49,6 +49,7 @@ class SignUpViewModel @ViewModelInject constructor(
                 is ApiResponse.Success -> {
                     _parentCreationLiveData.postValue(response.data!!)
                     FirebaseRepository.saveToken(parent.login)
+                    expensesRepository.getItemToBuyDao().createUser(User(response.data.id))
                 }
                 is ApiResponse.Error -> {
                     _parentCreationLiveData.postValue(null)
@@ -56,7 +57,6 @@ class SignUpViewModel @ViewModelInject constructor(
                 }
             }
         }
-        FirebaseRepository.saveToken(parent.login)
     }
 
 

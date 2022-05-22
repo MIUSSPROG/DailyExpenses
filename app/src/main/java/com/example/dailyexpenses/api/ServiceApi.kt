@@ -1,8 +1,6 @@
 package com.example.dailyexpenses.api
 
-import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
-import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.*
@@ -75,8 +73,15 @@ interface ServiceApi {
     @DELETE("api/v1/plan/{id}/destroy")
     suspend fun deletePlan(@Path("id") id: Int): Response<Unit>
 
-    @GET("api/v1/child/{id}/plans")
-    suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>
+//    @GET("api/v1/child/{id}/plans")
+//    suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>
+
+    @GET("api/v1/child_plans")
+    suspend fun getChildPlans(@Query("child") childId: Int, @Query("date_min") fromDateUnix: Long, @Query("date_max") toDateUnix: Long): Response<List<Plan>>
+
+    @GET("api/v1/child_plans")
+    suspend fun getAllChildPlans(@Query("child") childId: Int): Response<List<Plan>>
+
 
     @GET("api/v1/child/filtered_plans")
     suspend fun getFilteredPlans(@Query("mode") mode: Boolean, @Query("childId") childId: Int): List<Plan>

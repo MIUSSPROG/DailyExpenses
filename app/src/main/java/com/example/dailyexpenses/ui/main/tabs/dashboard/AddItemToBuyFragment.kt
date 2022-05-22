@@ -1,6 +1,7 @@
 package com.example.dailyexpenses.ui.main.tabs.dashboard
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.example.dailyexpenses.api.Category
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.databinding.FragmentAddItemToBuyBinding
 import com.example.dailyexpenses.utils.HelperMethods
+import com.example.dailyexpenses.utils.prefs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.SimpleDateFormat
@@ -54,11 +56,9 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
                 val sumToBuy = etSumToBuy.text.toString()
 
                 if (selectedCategory != null && plan.isNotBlank() && sumToBuy.isNotBlank()){
-                    val itemToBuy = ItemToBuy(name = plan, price = sumToBuy.toFloat(), date = args.dateToBuyItem, category = selectedCategory!!.name, categoryId = selectedCategory!!.id, confirm = null)
+                    val itemToBuy = ItemToBuy(userRemoteId = prefs.id, name = plan, price = sumToBuy.toFloat(), date = args.dateToBuyItem, category = selectedCategory!!.name, categoryId = selectedCategory!!.id, confirm = null)
                     viewModel.saveItemToBuy(itemToBuy)
-//                    val action = AddItemToBuyFragmentDirections.navigateToDashboardFragment(args.dateToBuyItem)
-//                    findNavController().navigate(action)
-//                    Toast.makeText(requireContext(), "успешно сохранен!", Toast.LENGTH_SHORT).show()
+
                     parentFragmentManager.setFragmentResult(REQUEST_CODE, bundleOf(EXTRA_DATE_SELECTED to args.dateToBuyItem))
                     dismiss()
                 }

@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.data.DiagramData
 import com.example.dailyexpenses.data.HistogramData
 import com.example.dailyexpenses.repository.ExpensesRepository
+import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
@@ -24,7 +25,7 @@ class DiagramViewModel @ViewModelInject constructor(
 
     fun getDataForHistogram(fromDate: Long, toDate: Long){
         viewModelScope.launch {
-            expensesRepository.getItemToBuyDao().getAllItemsInRange(fromDate, toDate).collect {
+            expensesRepository.getItemToBuyDao().getAllItemsInRange(prefs.id, fromDate, toDate).collect {
                 _dataForHistogram.postValue(it)
             }
         }
@@ -32,7 +33,7 @@ class DiagramViewModel @ViewModelInject constructor(
 
     fun getDataForDiagram(fromDate: Long, toDate: Long){
         viewModelScope.launch {
-            expensesRepository.getItemToBuyDao().getAllItemsByCategory(fromDate, toDate).collect {
+            expensesRepository.getItemToBuyDao().getAllItemsByCategory(prefs.id, fromDate, toDate).collect {
                 _dataForDiagram.postValue(it)
             }
         }

@@ -8,6 +8,7 @@ import com.example.dailyexpenses.api.*
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 class ParentDashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
@@ -100,9 +101,16 @@ class ParentDashboardViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val categories = expensesRepository.getRemoteDataSource().getCategories()
             val categoryMap = categories.associateBy ({it.id}, {it.name})
-            val response = expensesRepository.getRemoteDataSource().getChildPlans(childId)
+            var response: Response<List<Plan>>
+            if (firstUnixTime == 0L && secondUnixTime == 0L ){
+                response = expensesRepository.getRemoteDataSource().getAllChildPlans(childId)
+            }
+            else{
+                response = expensesRepository.getRemoteDataSource().getChildPlans(id = childId, fromDateUnix = firstUnixTime, toDateUnix = secondUnixTime)
+            }
+//            val response = expensesRepository.getRemoteDataSource().getChildPlans(childId)
             val plansRV = mutableListOf<PlanRV>()
-            response.body()?.plans?.forEach {
+            response.body()?.forEach {
                 val planRV =
                     categoryMap[it.categoryId]?.let { it1 ->
                         PlanRV(
@@ -115,14 +123,8 @@ class ParentDashboardViewModel @ViewModelInject constructor(
                             categoryName = it1
                         )
                     }
-                    if (firstUnixTime == 0L && secondUnixTime == 0L ){
-                        plansRV.add(planRV!!)
-                    }
-                    else {
-                        if (planRV!!.date in (firstUnixTime..secondUnixTime)) {
-                            plansRV.add(planRV!!)
-                        }
-                    }
+                plansRV.add(planRV!!)
+
                 }
             childPlans.postValue(plansRV.sortedBy { it.date })
             }

@@ -12,8 +12,8 @@ import java.util.*
     foreignKeys = [
         ForeignKey(
             entity = User::class,
-            parentColumns = ["login"],
-            childColumns = ["login"],
+            parentColumns = ["id"],
+            childColumns = ["userRemoteId"],
             onDelete = CASCADE,
             onUpdate = CASCADE
         )
@@ -30,7 +30,8 @@ data class ItemToBuy(
     val confirm: Boolean?,
     val send: Boolean = false,
     val remoteDbId: Int? = null,
-    val login: String? = null
+    val userRemoteId: Int? = null
+//    val login: String? = null
 ) {
     fun convertToDbPlan(childId: Int)  =
         Plan(

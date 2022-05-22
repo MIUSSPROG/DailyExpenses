@@ -6,5 +6,5 @@ import androidx.room.PrimaryKey
 @Entity
 data class User(
     @PrimaryKey
-    val login: String
+    val id: Int
 )

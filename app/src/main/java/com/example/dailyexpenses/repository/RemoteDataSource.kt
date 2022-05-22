@@ -82,7 +82,9 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         }
     }
 
-    suspend fun getChildPlans(id: Int) = serviceApi.getChildPlans(id)
+    suspend fun getChildPlans(id: Int, fromDateUnix: Long, toDateUnix: Long) = serviceApi.getChildPlans(childId = id, fromDateUnix = fromDateUnix, toDateUnix = toDateUnix)
+
+    suspend fun getAllChildPlans(id: Int) = serviceApi.getAllChildPlans(childId = id)
 
     suspend fun getFilteredPlans(mode: Boolean, childId: Int): ApiResponse<List<Plan>>{
         return try {

@@ -19,8 +19,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
-import java.lang.Exception
 import java.util.*
+import kotlin.Exception
 
 class DashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
@@ -50,14 +50,14 @@ class DashboardViewModel @ViewModelInject constructor(
     fun getItemsToBuy(pickedDate: Long){
         viewModelScope.launch(Dispatchers.IO) {
             val plansFromServerDeffered = async{
-                expensesRepository.getRemoteDataSource().getChildPlans(prefs.id)
+                expensesRepository.getRemoteDataSource().getChildPlans(id = prefs.id, fromDateUnix = pickedDate, toDateUnix = pickedDate)
             }
 
             val plansFromDBDeffered = async{
-                expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
+                expensesRepository.getItemToBuyDao().getAllItems(userId = prefs.id, pickDate = pickedDate )
             }
 
-            val plansFromServer = plansFromServerDeffered.await().body()?.plans
+            val plansFromServer = plansFromServerDeffered.await().body()
             val plansFromDB = plansFromDBDeffered.await()
 
             plansFromServer?.forEach { serverPlan ->
@@ -70,7 +70,7 @@ class DashboardViewModel @ViewModelInject constructor(
                 }
             }
 
-            val res = expensesRepository.getItemToBuyDao().getAllItems(pickedDate)
+            val res = expensesRepository.getItemToBuyDao().getAllItems(userId = prefs.id, pickDate = pickedDate)
             _itemsToBuy.postValue(DashboardUiState.Success(data = res))
         }
     }
@@ -90,7 +90,7 @@ class DashboardViewModel @ViewModelInject constructor(
                 val calendar = Calendar.getInstance()
                 val todayDay = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[0].toInt()
 
-                val plansFromDB = expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate()
+                val plansFromDB = expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate(prefs.id)
 
                 if (plansFromDB.isNotEmpty()) {
                     var plansFromDbGroupByDate = mutableMapOf<Int, MutableList<ItemToBuy>>()
@@ -121,7 +121,7 @@ class DashboardViewModel @ViewModelInject constructor(
                             else if (itemToBuy.confirm == false){
                                 rejected ++
                             }
-                            else if (itemToBuy.send){
+                            if (itemToBuy.send){
                                 send ++
                             }
                         }
@@ -131,11 +131,11 @@ class DashboardViewModel @ViewModelInject constructor(
                         else if (rejected > 0){
                             events.add(EventDay(calendar, R.drawable.ic_cancel))
                         }
+                        else if (send != it.value.size){
+                            events.add(EventDay(calendar, R.drawable.ic_priority))
+                        }
                         else if (send > 0){
                             events.add(EventDay(calendar, R.drawable.ic_sync))
-                        }
-                        else{
-                            events.add(EventDay(calendar, R.drawable.ic_priority))
                         }
                     }
                     _calendarEvents.postValue(events)
@@ -147,38 +147,44 @@ class DashboardViewModel @ViewModelInject constructor(
     }
 
     fun sendItemToBuyForParentApproval(pickedDate: Long) = viewModelScope.launch{
-        val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
-        val plansForApproval = mutableListOf<Plan>()
+        try {
+            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
 
-        itemsToBuyFromDB.filter { !it.send }.forEach { item ->
-            val plan = Plan(name = item.name,
-                price = item.price,
-                date = item.date,
-                confirm = item.confirm,
-                categoryId = item.categoryId,
-                childId = prefs.id,
-                dbId = item.id,
-            )
-            plansForApproval.add(plan)
-        }
-        if (plansForApproval.size != 0) {
-            val response =
-                expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
-            when (response) {
-                is ApiResponse.Success -> {
-                    val sendedPlans = response.data
-                    itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
-                        expensesRepository.getItemToBuyDao().update(item.copy(send = true, remoteDbId = sendedPlans[index].id))
+            val plansForApproval = mutableListOf<Plan>()
+
+            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
+                val plan = Plan(name = item.name,
+                    price = item.price,
+                    date = item.date,
+                    confirm = item.confirm,
+                    categoryId = item.categoryId,
+                    childId = prefs.id,
+                    dbId = item.id,
+                )
+                plansForApproval.add(plan)
+            }
+            if (plansForApproval.size != 0) {
+                val response =
+                    expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
+                when (response) {
+                    is ApiResponse.Success -> {
+                        val sendedPlans = response.data
+                        itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
+                            expensesRepository.getItemToBuyDao().update(item.copy(send = true, remoteDbId = sendedPlans[index].id))
+                        }
+                        plansChannel.send(DashboardUiState.Success<Nothing>())
                     }
-                    plansChannel.send(DashboardUiState.Success<Nothing>())
-                }
-                is ApiResponse.Error -> {
-                    plansChannel.send(DashboardUiState.Error("Некорректные данные"))
+                    is ApiResponse.Error -> {
+                        plansChannel.send(DashboardUiState.Error("Некорректные данные"))
+                    }
                 }
             }
-        }
-        else{
-            plansChannel.send(DashboardUiState.Error("Все данные уже были отправлены"))
+            else{
+                plansChannel.send(DashboardUiState.Error("Все данные уже были отправлены"))
+            }
+        }catch (e: Exception){
+            plansChannel.send(DashboardUiState.Error("Ошибка!"))
+            Log.d("Error", e.message.toString())
         }
     }
 

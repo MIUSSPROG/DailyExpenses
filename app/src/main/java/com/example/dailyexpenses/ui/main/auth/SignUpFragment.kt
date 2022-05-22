@@ -62,13 +62,6 @@ class SignUpFragment: Fragment(R.layout.fragment_sign_up) {
                         Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
                     }
                 }
-//                viewModel.userCreationLiveData.observe(viewLifecycleOwner){ userResponse ->
-//                    if (userResponse == null){
-//                        Toast.makeText(requireContext(), "Пользователь с таким username уже сущетсвует!", Toast.LENGTH_SHORT).show()
-//                    }else{
-//                        Toast.makeText(requireContext(), "Вы успешно зарегистрированы!", Toast.LENGTH_SHORT).show()
-//                    }
-//                }
             }
             else{
                 Toast.makeText(requireContext(), "Заполните все поля!", Toast.LENGTH_SHORT).show()
