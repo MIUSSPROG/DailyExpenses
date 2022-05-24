@@ -43,17 +43,6 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun getChildren() = serviceApi.getChildren()
 
-//    suspend fun createChild(child: Child): ApiResponse<Child>{
-//        return try {
-//            val response = serviceApi.createChild(child).body()!!
-//                ApiResponse.Success(data = response)
-//        }catch (e: HttpException){
-//            ApiResponse.Error(exception = e)
-//        }catch (e: IOException){
-//            ApiResponse.Error(exception = e)
-//        }
-//    }
-
     suspend fun createChildEncoded(child: Child): ApiResponse<Child>{
         return try {
             val response = serviceApi.saveChildEncoded(child)
@@ -122,10 +111,6 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
     suspend fun sendInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.sendInvitation(id, childInvitation)
 
     suspend fun checkInvitation(parentId: Int, childLogin: String) = serviceApi.checkInvitation(parentId, childLogin)
-
-//    suspend fun getChildrenInvitations(parentId: Int) = serviceApi.getParentChildren(parentId)
-
-//    suspend fun getInvitationId(parentId: Int, childId: Int) = serviceApi.getInvitationId(childId, parentId)
 
     suspend fun confirmInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
 

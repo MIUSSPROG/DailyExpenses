@@ -140,7 +140,7 @@ class DashboardViewModel @ViewModelInject constructor(
 
     fun sendItemToBuyForParentApproval(pickedDate: Long) = viewModelScope.launch{
         try {
-            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
+            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItems(pickedDate, prefs.id)
 
             val plansForApproval = mutableListOf<Plan>()
 
