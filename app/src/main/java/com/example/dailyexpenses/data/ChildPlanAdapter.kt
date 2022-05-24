@@ -25,7 +25,7 @@ class ChildPlanAdapter(
         fun bind(plan: PlanRV){
             binding.apply {
                 tvPlanCat.text = plan.categoryName
-                tvPlanItemDate.text = HelperMethods.convertMillisToDate(plan.date)
+                tvPlanItemDate.text = HelperMethods.convertMillisToDate(plan.date - 24*60*60*1000)
                 tvPlanItemName.text = plan.name
                 tvPlanItemPrice.text = plan.price.toString()
                 btnConfirmPlanItem.tag = plan

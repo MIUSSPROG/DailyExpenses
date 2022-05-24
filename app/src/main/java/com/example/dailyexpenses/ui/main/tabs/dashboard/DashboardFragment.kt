@@ -1,6 +1,7 @@
 package com.example.dailyexpenses.ui.main.tabs.dashboard
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -29,6 +30,7 @@ import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDa
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.lang.Math.abs
 import java.util.*
 import kotlin.properties.Delegates
 
@@ -37,6 +39,8 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
     private lateinit var binding: FragmentDashboardBinding
     private var selectedDateUnix by Delegates.notNull<Long>()
+    private var isCurMonth = true
+    private var curMonth by Delegates.notNull<Int>()
     private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter() }
     private val viewModel: DashboardViewModel by viewModels()
 
@@ -47,22 +51,39 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     ): View? {
         binding = FragmentDashboardBinding.inflate(layoutInflater, container, false)
 
-
         binding.apply {
 
             val calendar = Calendar.getInstance()
-            val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
+            curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
             viewModel.setCalendarEvents(curMonth)
-            viewModel.calendarEvents.observe(viewLifecycleOwner){
+            viewModel.calendarEvents.observe(viewLifecycleOwner) {
                 calendarViewPlan.setEvents(it)
             }
 
-            selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis)
+            selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis + 24*60*60*1000)
 
             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
 
+            calendarViewPlan.setOnForwardPageChangeListener {
+                curMonth ++
+                if (curMonth == 13){
+                    curMonth = 1
+                }
+                isCurMonth = false
+                viewModel.setCalendarEvents(curMonth)
+            }
+
+            calendarViewPlan.setOnPreviousPageChangeListener {
+                curMonth--
+                if (curMonth == 0){
+                    curMonth = 12
+                }
+                isCurMonth = false
+                viewModel.setCalendarEvents(curMonth)
+            }
+
             calendarViewPlan.setOnDayClickListener { eventDay ->
-                selectedDateUnix = convertMillisToDateMills(eventDay.calendar.timeInMillis)
+                selectedDateUnix = convertMillisToDateMills(eventDay.calendar.timeInMillis + 24*60*60*1000)
                 viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
             }
 
@@ -75,6 +96,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             }
 
             btnAddItem.setOnClickListener {
+                Log.d("time", selectedDateUnix.toString())
                 val action =
                     DashboardFragmentDirections.navigateToAddItemToBuyFragment(selectedDateUnix)
                 findNavController().navigate(action)
@@ -96,8 +118,8 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             when (it) {
                 is DashboardViewModel.DashboardUiState.Success<*> -> {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
-                    val calendar = Calendar.getInstance()
-                    val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
+//                    val calendar = Calendar.getInstance()
+//                    val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
                     viewModel.setCalendarEvents(curMonth)
                 }
                 is DashboardViewModel.DashboardUiState.Error -> {
@@ -181,15 +203,11 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
             override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
                 val itemToDelete = itemsToBuyAdapter.currentList[viewHolder.adapterPosition]
-                val calendar = Calendar.getInstance()
-                val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
                 viewModel.deleteItem(itemToDelete)
-                viewModel.setCalendarEvents(curMonth)
             }
 
         })
 
         itemTouchHelper.attachToRecyclerView(binding.rvDateItems)
     }
-
 }

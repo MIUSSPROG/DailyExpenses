@@ -37,7 +37,8 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
         binding = FragmentAddItemToBuyBinding.inflate(inflater, container, false)
 //        private val dateToBuyItem: Long
         binding.apply {
-            tvDateToBuy.text = HelperMethods.convertMillisToDate(args.dateToBuyItem)
+            Log.d("time", args.dateToBuyItem.toString())
+            tvDateToBuy.text = HelperMethods.convertMillisToDate(args.dateToBuyItem - 24*60*60*1000)
 
             viewModel.getCategories()
             viewModel.categoriesLiveData.observe(viewLifecycleOwner){

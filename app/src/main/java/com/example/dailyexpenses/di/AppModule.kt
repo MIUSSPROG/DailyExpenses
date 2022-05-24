@@ -17,6 +17,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Named
+import javax.inject.Qualifier
 import javax.inject.Singleton
 
 
@@ -41,7 +42,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    @Named("dailyExpenses")
+    @DailyExpenses
     fun provideRetrofit(): Retrofit {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -58,7 +59,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    @Named("fcm")
+    @Fcm
     fun provideRetrofitFcm(): Retrofit{
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -75,11 +76,17 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideServiceApi(@Named("dailyExpenses") retrofit: Retrofit): ServiceApi =
+    fun provideServiceApi(@DailyExpenses retrofit: Retrofit): ServiceApi =
         retrofit.create(ServiceApi::class.java)
 
     @Provides
     @Singleton
-    fun provideFcmApi(@Named("fcm") retrofit: Retrofit): FirebaseCloudMessagingApi =
+    fun provideFcmApi(@Fcm retrofit: Retrofit): FirebaseCloudMessagingApi =
         retrofit.create(FirebaseCloudMessagingApi::class.java)
 }
+
+@Qualifier
+annotation class DailyExpenses
+
+@Qualifier
+annotation class Fcm

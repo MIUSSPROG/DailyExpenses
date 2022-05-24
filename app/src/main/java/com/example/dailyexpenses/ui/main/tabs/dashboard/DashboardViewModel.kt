@@ -76,19 +76,10 @@ class DashboardViewModel @ViewModelInject constructor(
     }
 
 
-//    private fun updateItem(item: ItemToBuy, plan: Plan){
-//        viewModelScope.launch {
-//            expensesRepository.getItemToBuyDao()
-//                .update(item.copy(confirm = plan.confirm))
-//        }
-//    }
-
     fun setCalendarEvents(curMonth: Int){
         viewModelScope.launch {
             try {
                 val events = mutableListOf<EventDay>()
-                val calendar = Calendar.getInstance()
-                val todayDay = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[0].toInt()
 
                 val plansFromDB = expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate(prefs.id)
 
@@ -109,8 +100,9 @@ class DashboardViewModel @ViewModelInject constructor(
                     }
 
                     plansFromDbGroupByDate.forEach {
-                        val calendar = Calendar.getInstance()
-                        calendar.add(Calendar.DAY_OF_MONTH, it.key - todayDay)
+                        var calendar = Calendar.getInstance()
+                        calendar.set(2022, curMonth-1, 1)
+                        calendar.add(Calendar.DAY_OF_MONTH, it.key-2)
                         var confirmed = 0
                         var rejected = 0
                         var send = 0
