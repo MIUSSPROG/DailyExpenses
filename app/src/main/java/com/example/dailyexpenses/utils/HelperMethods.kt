@@ -23,6 +23,14 @@ class HelperMethods {
     }
 }
 
+sealed class UiState<T>(
+    data: T? = null,
+    exception: Exception? = null
+){
+    data class Success<T>(val data: T? = null): UiState<T>(data, null)
+    data class Error<T>(val exception: Exception): UiState<T>(null, exception)
+}
+
 //class PieAxisCategoryNameFormatter: ValueFormatter(){
 //    override fun getAxisLabel(value: Float, axis: AxisBase?): String {
 //        return

@@ -10,9 +10,11 @@ import com.applandeo.materialcalendarview.EventDay
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.ApiResponse
 import com.example.dailyexpenses.api.Plan
+import com.example.dailyexpenses.data.DaoResponse
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.repository.ExpensesRepository
 import com.example.dailyexpenses.utils.HelperMethods
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
@@ -41,10 +43,10 @@ class DashboardViewModel @ViewModelInject constructor(
     private val _calendarEvents = MutableLiveData<List<EventDay>>()
     val calendarEvents: LiveData<List<EventDay>> = _calendarEvents
 
-    private val _itemsToBuy = MutableLiveData<DashboardUiState>(DashboardUiState.Empty)
+    private val _itemsToBuy = MutableLiveData<DashboardUiState>()
     val itemsToBuy: LiveData<DashboardUiState> = _itemsToBuy
 
-    private val _deletedItem = MutableLiveData<DashboardUiState>(DashboardUiState.Empty)
+    private val _deletedItem = MutableLiveData<DashboardUiState>()
     val deletedItem: LiveData<DashboardUiState> = _deletedItem
 
     fun getItemsToBuy(pickedDate: Long){
@@ -140,7 +142,7 @@ class DashboardViewModel @ViewModelInject constructor(
 
     fun sendItemToBuyForParentApproval(pickedDate: Long) = viewModelScope.launch{
         try {
-            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItems(pickedDate, prefs.id)
+            val itemsToBuyFromDB = expensesRepository.getDaoSource().getAllItems(pickedDate, prefs.id)
 
             val plansForApproval = mutableListOf<Plan>()
 
@@ -164,75 +166,58 @@ class DashboardViewModel @ViewModelInject constructor(
                         itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
                             expensesRepository.getItemToBuyDao().update(item.copy(send = true, remoteDbId = sendedPlans[index].id))
                         }
-                        plansChannel.send(DashboardUiState.Success<Nothing>())
+                        plansChannel.send(UiState.Success())
                     }
                     is ApiResponse.Error -> {
-                        plansChannel.send(DashboardUiState.Error("Некорректные данные"))
+                        plansChannel.send(UiState.Error(Exception("Некорректные данные")))
                     }
                 }
             }
             else{
-                plansChannel.send(DashboardUiState.Error("Все данные уже были отправлены"))
+                plansChannel.send(UiState.Error(Exception("Все данные уже были отправлены")))
             }
         }catch (e: Exception){
-            plansChannel.send(DashboardUiState.Error("Ошибка!"))
+            plansChannel.send(UiState.Error(Exception("Ошибка получения данных!")))
             Log.d("Error", e.message.toString())
         }
     }
 
-//    fun sendItemToBuyToParentApproval(pickedDate: Long){
-//        viewModelScope.launch {
-//            val itemsToBuyFromDB = expensesRepository.getItemToBuyDao().getAllItemsToSendToParentApproval(pickedDate)
-//            val plansForApproval = mutableListOf<Plan>()
-//
-//            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
-//                val plan = Plan(name = item.name,
-//                    price = item.price,
-//                    date = item.date,
-//                    confirm = item.confirm,
-//                    categoryId = item.categoryId,
-//                    childId = prefs.id,
-//                    dbId = item.id,
-//                )
-//                plansForApproval.add(plan)
-//            }
-//            val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
-//            when(response){
-//                is ApiResponse.Success -> {
-//                    itemsToBuyFromDB.forEach {
-//                        expensesRepository.getItemToBuyDao().update(it.copy(send = true))
-//                    }
-//                    _plansLiveData.postValue(response.data!!)
-//                }
-//                is ApiResponse.Error -> {
-//                    _plansLiveData.postValue(400)
-//                }
-//            }
-//
-//        }
-//    }
-
     fun deleteItem(itemToBuy: ItemToBuy){
         viewModelScope.launch {
-            expensesRepository.getItemToBuyDao().delete(itemToBuy)
             if (itemToBuy.send) {
                 val response = expensesRepository.getRemoteDataSource().deletePlan(itemToBuy.remoteDbId!!)
                 when(response){
                     is ApiResponse.Success -> {
-                        _deletedItem.postValue(DashboardUiState.Success<Nothing>())
+//                        _deletedItem.postValue(UiState.Success())
+                        deleteItemFromLocalDb(itemToBuy)
                     }
                     is ApiResponse.Error -> {
-                        _deletedItem.postValue(DashboardUiState.Error("Ошибка"))
+                        _deletedItem.postValue(UiState.Error(Exception("Ошибка удаления с сервера")))
                     }
                 }
+            }
+            else{
+                deleteItemFromLocalDb(itemToBuy)
             }
         }
     }
 
-    sealed class DashboardUiState{
-        data class Success<T>(val data: T? = null): DashboardUiState()
-        data class Error(val message: String): DashboardUiState()
-        object Empty: DashboardUiState()
+    suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){
+        val deleteResponse = expensesRepository.getDaoSource().deleteItemToBuy(itemToBuy)
+        when(deleteResponse){
+            is DaoResponse.Success -> {
+                _deletedItem.postValue(UiState.Success())
+            }
+            is DaoResponse.Error -> {
+                _deletedItem.postValue(UiState.Error(Exception("Ошибка удаления из локальной бд")))
+            }
+        }
     }
+
+//    sealed class DashboardUiState{
+//        data class Success<T>(val data: T? = null): DashboardUiState()
+//        data class Error(val message: String): DashboardUiState()
+//        object Empty: DashboardUiState()
+//    }
 
 }

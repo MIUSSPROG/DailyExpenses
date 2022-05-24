@@ -4,6 +4,14 @@ import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
 
+//sealed class DaoResponse<T>(
+//    data: T? = null,
+//    exception: Exception? = null
+//){
+//    data class Success<T>(val data: T): DaoResponse<T>(data, null)
+//    data class Error<T>(val exception: Exception): DaoResponse<T>(null, exception)
+//}
+
 sealed class DaoResponse<T>(
     data: T? = null,
     exception: Exception? = null
