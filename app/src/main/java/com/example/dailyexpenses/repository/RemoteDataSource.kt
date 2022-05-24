@@ -23,9 +23,7 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         return try{
             val response = serviceApi.saveParentEncoded(parentPost)
             ApiResponse.Success(data = response)
-        }catch (e: HttpException){
-            ApiResponse.Error(exception = e)
-        }catch (e: IOException){
+        }catch (e: Exception) {
             ApiResponse.Error(exception = e)
         }
     }

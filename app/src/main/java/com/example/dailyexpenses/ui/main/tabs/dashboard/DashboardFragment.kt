@@ -27,6 +27,7 @@ import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Com
 import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.REQUEST_CODE
 import com.example.dailyexpenses.utils.HelperMethods
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDateMills
+import com.example.dailyexpenses.utils.UiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -116,13 +117,13 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
         viewModel.itemsToBuy.observe(viewLifecycleOwner) {
             when (it) {
-                is DashboardViewModel.DashboardUiState.Success<*> -> {
+                is UiState.Success<*> -> {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
 //                    val calendar = Calendar.getInstance()
 //                    val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
                     viewModel.setCalendarEvents(curMonth)
                 }
-                is DashboardViewModel.DashboardUiState.Error -> {
+                is UiState.Error<*> -> {
                     Toast.makeText(
                         requireContext(),
                         "Не удалось получить данные!",
