@@ -6,6 +6,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.navOptions
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.ChildParent
@@ -14,6 +15,7 @@ import com.example.dailyexpenses.databinding.FragmentProfileBinding
 import com.example.dailyexpenses.utils.findTopNavController
 import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -33,11 +35,22 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         viewModel.checkChildParentLiveData.observe(viewLifecycleOwner){ childParent ->
             if (childParent.confirmed) pinParent(childParent) else unpinParent()
         }
-
-        viewModel.cancelInvitationLiveData.observe(viewLifecycleOwner){
-            unpinParent()
-            Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT).show()
+        lifecycleScope.launchWhenStarted {
+            viewModel.eventFlow.collect {
+                when (it) {
+                    is ProfileViewModel.UiState.Success -> {
+                        unpinParent()
+                        Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                }
+            }
         }
+
+//        viewModel.cancelInvitationLiveData.observe(viewLifecycleOwner){
+//            unpinParent()
+//            Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT).show()
+//        }
 //        lifecycleScope.launchWhenCreated {
 //            viewModel.cancelInvitationStateFlow.collect {
 //                unpinParent()

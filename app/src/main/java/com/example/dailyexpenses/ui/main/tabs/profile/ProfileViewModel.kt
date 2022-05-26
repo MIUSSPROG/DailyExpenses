@@ -13,6 +13,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
@@ -26,6 +28,8 @@ class ProfileViewModel @ViewModelInject constructor(
     val checkParentLiveData = MutableLiveData<Parent?>()
     val checkChildParentLiveData = MutableLiveData<ChildParent>()
     val cancelInvitationLiveData = MutableLiveData<Child>()
+    private val eventChannel = Channel<UiState>()
+    val eventFlow = eventChannel.receiveAsFlow()
 //    val cancelInvitationStateFlow = MutableStateFlow<Child?>(null)
 
     fun getParents(){
@@ -66,7 +70,8 @@ class ProfileViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().cancelInvitation(prefs.id, ChildInvitation(parent = null, confirmed = false))
             if (response.isSuccessful && response.body() != null) {
-                cancelInvitationLiveData.postValue(response.body())
+//                cancelInvitationLiveData.postValue(response.body())
+                eventChannel.send(UiState.Success)
             }
         }
     }
@@ -106,5 +111,12 @@ class ProfileViewModel @ViewModelInject constructor(
             }
         }
 
+    }
+
+    sealed class UiState{
+        object Success: UiState()
+        data class Error(val message: String): UiState()
+        object Loading: UiState()
+        object Empty: UiState()
     }
 }
