@@ -31,23 +31,23 @@ class DashboardViewModel @ViewModelInject constructor(
 //    private val _itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
 //    val itemToBuyLiveData: LiveData<List<ItemToBuy>> = _itemToBuyLiveData
 
-    private val _plansLiveData = MutableLiveData<Int>()
-    val plansLiveData: LiveData<Int> = _plansLiveData
+//    private val _plansLiveData = MutableLiveData<Int>()
+//    val plansLiveData: LiveData<Int> = _plansLiveData
 
-    private val _plansFlow = MutableStateFlow<DashboardUiState>(DashboardUiState.Empty)
-    val planFlow: StateFlow<DashboardUiState> = _plansFlow
+//    private val _plansFlow = MutableStateFlow<UiState>(UiState.Empty)
+//    val planFlow: StateFlow<DashboardUiState> = _plansFlow
 
-    private val plansChannel = Channel<DashboardUiState>()
+    private val plansChannel = Channel<UiState<Nothing>>()
     val plansChannelFlow = plansChannel.receiveAsFlow()
 
     private val _calendarEvents = MutableLiveData<List<EventDay>>()
     val calendarEvents: LiveData<List<EventDay>> = _calendarEvents
 
-    private val _itemsToBuy = MutableLiveData<DashboardUiState>()
-    val itemsToBuy: LiveData<DashboardUiState> = _itemsToBuy
+    private val _itemsToBuy = MutableLiveData<UiState<List<ItemToBuy>>>()
+    val itemsToBuy: LiveData<UiState<List<ItemToBuy>>> = _itemsToBuy
 
-    private val _deletedItem = MutableLiveData<DashboardUiState>()
-    val deletedItem: LiveData<DashboardUiState> = _deletedItem
+    private val _deletedItem = MutableLiveData<UiState<Nothing>>()
+    val deletedItem: LiveData<UiState<Nothing>> = _deletedItem
 
     fun getItemsToBuy(pickedDate: Long){
         viewModelScope.launch(Dispatchers.IO) {
@@ -56,7 +56,7 @@ class DashboardViewModel @ViewModelInject constructor(
             }
 
             val plansFromDBDeffered = async{
-                expensesRepository.getItemToBuyDao().getAllItems(userId = prefs.id, pickDate = pickedDate )
+                expensesRepository.getDaoSource().getAllItems(userId = prefs.id, pickedDate = pickedDate)
             }
 
             val plansFromServer = plansFromServerDeffered.await().body()
@@ -72,7 +72,7 @@ class DashboardViewModel @ViewModelInject constructor(
                 }
             }
 
-            val res = expensesRepository.getItemToBuyDao().getAllItems(userId = prefs.id, pickDate = pickedDate)
+            val res = expensesRepository.getDaoSource().getAllItems(userId = prefs.id, pickedDate = pickedDate)
             _itemsToBuy.postValue(DashboardUiState.Success(data = res))
         }
     }

@@ -138,7 +138,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
                 viewModel.plansChannelFlow.collect {
                     when (it) {
-                        is DashboardViewModel.DashboardUiState.Success<*> -> {
+                        is DashboardViewModel.UiState.Success<*> -> {
                             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                             Toast.makeText(
                                 requireContext(),
