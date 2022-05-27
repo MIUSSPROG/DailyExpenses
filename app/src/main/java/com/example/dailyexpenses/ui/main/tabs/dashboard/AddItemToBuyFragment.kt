@@ -15,6 +15,7 @@ import com.example.dailyexpenses.api.Category
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.databinding.FragmentAddItemToBuyBinding
 import com.example.dailyexpenses.utils.HelperMethods
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.prefs
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,16 +36,34 @@ class AddItemToBuyFragment: BottomSheetDialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         binding = FragmentAddItemToBuyBinding.inflate(inflater, container, false)
-//        private val dateToBuyItem: Long
+
         binding.apply {
             Log.d("time", args.dateToBuyItem.toString())
             tvDateToBuy.text = HelperMethods.convertMillisToDate(args.dateToBuyItem - 24*60*60*1000)
 
             viewModel.getCategories()
             viewModel.categoriesLiveData.observe(viewLifecycleOwner){
-                categories = it
-                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, it)
-                etCategories.setAdapter(adapter)
+                when(it){
+                    is UiState.Success -> {
+                        categories = it.data!!
+                        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, categories)
+                        etCategories.setAdapter(adapter)
+                    }
+                    is UiState.Error -> {
+                        Toast.makeText(requireContext(), "Не удалось подгрузить категории", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            viewModel.savedItemToBuy.observe(viewLifecycleOwner){
+                when(it){
+                    is UiState.Success -> {
+                        Toast.makeText(requireContext(), "Успешно добавлено!", Toast.LENGTH_SHORT).show()
+                    }
+                    is UiState.Error -> {
+                        Toast.makeText(requireContext(), "Ошибка добавления элемента", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
 
             etCategories.setOnItemClickListener { adapterView, view, position, id ->

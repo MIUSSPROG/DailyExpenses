@@ -12,6 +12,7 @@ import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.data.ChildrenListActionListener
 import com.example.dailyexpenses.data.ChildrenListAdapter
 import com.example.dailyexpenses.databinding.FragmentParentProfileBinding
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.findTopNavController
 import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,22 +40,26 @@ class ParentProfileFragment: Fragment(R.layout.fragment_parent_profile) {
         setupRecyclerView()
 
         viewModel.confirmInvitationLiveData.observe(viewLifecycleOwner){ response ->
-            if (response.isSuccessful){
-                viewModel.getChildrenInvitations(prefs.id)
-            }
-            else{
-                Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
+            when(response){
+                is UiState.Success -> {
+                    viewModel.getChildrenInvitations(prefs.id)
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
+                }
             }
         }
 
         viewModel.getChildrenInvitations(prefs.id)
         viewModel.childrenInvitationsLiveData.observe(viewLifecycleOwner){ response ->
-            if (response == null) {
-                Toast.makeText(requireContext(), "Ошибка подгрузки данных!", Toast.LENGTH_SHORT).show()
-            }
-            else{
-                childrenListAdapter.submitList(response.children)
-                binding.pbLoadChildren.visibility = View.INVISIBLE
+            when(response){
+                is UiState.Success -> {
+                    childrenListAdapter.submitList(response.data?.children)
+                    binding.pbLoadChildren.visibility = View.INVISIBLE
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), "Ошибка подгрузки данных!", Toast.LENGTH_SHORT).show()
+                }
             }
 
         }

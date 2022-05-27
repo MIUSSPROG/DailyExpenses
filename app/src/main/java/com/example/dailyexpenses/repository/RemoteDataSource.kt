@@ -4,9 +4,9 @@ import com.example.dailyexpenses.api.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.Response
 import okhttp3.ResponseBody
 import retrofit2.HttpException
+import retrofit2.Response
 import retrofit2.Retrofit
 import java.io.IOException
 import javax.inject.Inject
@@ -16,8 +16,6 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
     suspend fun getCategories() = serviceApi.getCategories()
 
     suspend fun getParents() = serviceApi.getParents()
-
-//    suspend fun createParent(parentPost: Parent) = serviceApi.createParent(parentPost)
 
     suspend fun createParentEncoded(parentPost: Parent): ApiResponse<Parent>{
         return try{
@@ -69,20 +67,11 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         }
     }
 
-    suspend fun getChildPlans(id: Int, fromDateUnix: Long, toDateUnix: Long) = serviceApi.getChildPlans(childId = id, fromDateUnix = fromDateUnix, toDateUnix = toDateUnix)
+    suspend fun getChildPlans(id: Int, fromDateUnix: Long, toDateUnix: Long, confirmed: Boolean? = null) = serviceApi.getChildPlans(childId = id, fromDateUnix = fromDateUnix, toDateUnix = toDateUnix, confirmed=confirmed)
 
-    suspend fun getAllChildPlans(id: Int) = serviceApi.getAllChildPlans(childId = id)
-
-    suspend fun getFilteredPlans(mode: Boolean, childId: Int): ApiResponse<List<Plan>>{
-        return try {
-            val response = serviceApi.getFilteredPlans(mode, childId)
-            ApiResponse.Success(data = response)
-        }catch (e: HttpException){
-            ApiResponse.Error(exception = e)
-        }catch (e: IOException){
-            ApiResponse.Error(exception = e)
-        }
-    }
+//    suspend fun getAllChildPlans(id: Int) = serviceApi.getAllChildPlans(childId = id)
+//
+//    suspend fun getFilteredPlans(mode: Boolean, childId: Int) = serviceApi.getFilteredPlans(mode, childId)
 
     suspend fun confirmPlan(id: Int, plan: PlanConfirm): ApiResponse<Plan>{
         return try {
@@ -110,7 +99,14 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun checkInvitation(parentId: Int, childLogin: String) = serviceApi.checkInvitation(parentId, childLogin)
 
-    suspend fun confirmInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
+    suspend fun confirmInvitation(id: Int, childInvitation: ChildInvitation): ApiResponse<Response<Child>>{
+        return try{
+            val response = serviceApi.confirmInvitation(id, childInvitation)
+            ApiResponse.Success(response)
+        }catch (e: Exception){
+            ApiResponse.Error(e)
+        }
+    }
 
     suspend fun cancelInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
 

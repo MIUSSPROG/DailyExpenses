@@ -28,15 +28,6 @@ class DashboardViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
 
-//    private val _itemToBuyLiveData = MutableLiveData<List<ItemToBuy>>()
-//    val itemToBuyLiveData: LiveData<List<ItemToBuy>> = _itemToBuyLiveData
-
-//    private val _plansLiveData = MutableLiveData<Int>()
-//    val plansLiveData: LiveData<Int> = _plansLiveData
-
-//    private val _plansFlow = MutableStateFlow<UiState>(UiState.Empty)
-//    val planFlow: StateFlow<DashboardUiState> = _plansFlow
-
     private val plansChannel = Channel<UiState<Nothing>>()
     val plansChannelFlow = plansChannel.receiveAsFlow()
 
@@ -49,10 +40,15 @@ class DashboardViewModel @ViewModelInject constructor(
     private val _deletedItem = MutableLiveData<UiState<Nothing>>()
     val deletedItem: LiveData<UiState<Nothing>> = _deletedItem
 
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        _itemsToBuy.postValue(UiState.Error(throwable as Exception))
+        Log.d("Error", throwable.message.toString())
+    }
+
     fun getItemsToBuy(pickedDate: Long){
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(exceptionHandler){
             val plansFromServerDeffered = async{
-                expensesRepository.getRemoteDataSource().getChildPlans(id = prefs.id, fromDateUnix = pickedDate, toDateUnix = pickedDate)
+                expensesRepository.getRemoteDataSource().getChildPlans(id = prefs.id,  fromDateUnix = pickedDate, toDateUnix = pickedDate)
             }
 
             val plansFromDBDeffered = async{
@@ -62,133 +58,123 @@ class DashboardViewModel @ViewModelInject constructor(
             val plansFromServer = plansFromServerDeffered.await().body()
             val plansFromDB = plansFromDBDeffered.await()
 
+
             plansFromServer?.forEach { serverPlan ->
                 val planExist = plansFromDB.firstOrNull{ plan -> plan.id == serverPlan.dbId }
                 if (planExist != null){
                     if (serverPlan.confirm != null){
-                        expensesRepository.getItemToBuyDao()
-                            .update(planExist.copy(confirm = serverPlan.confirm))
+                        expensesRepository.getDaoSource()
+                            .updateItemToBuy(planExist.copy(confirm = serverPlan.confirm))
                     }
                 }
             }
 
             val res = expensesRepository.getDaoSource().getAllItems(userId = prefs.id, pickedDate = pickedDate)
-            _itemsToBuy.postValue(DashboardUiState.Success(data = res))
+            _itemsToBuy.postValue(UiState.Success(data = res))
         }
     }
 
 
     fun setCalendarEvents(curMonth: Int){
         viewModelScope.launch {
-            try {
-                val events = mutableListOf<EventDay>()
+            when(val plansFromDB = expensesRepository.getDaoSource().getAllItemsOrderedByDate(prefs.id)){
+                is DaoResponse.Success -> {
+                    if (plansFromDB.data.isNotEmpty()) {
+                        val events = mutableListOf<EventDay>()
 
-                val plansFromDB = expensesRepository.getItemToBuyDao().getAllItemsOrderedByDate(prefs.id)
+                        var plansFromDbGroupByDate = mutableMapOf<Int, MutableList<ItemToBuy>>()
 
-                if (plansFromDB.isNotEmpty()) {
-                    var plansFromDbGroupByDate = mutableMapOf<Int, MutableList<ItemToBuy>>()
-
-                    plansFromDB.forEach { plan ->
-                        val month = HelperMethods.convertMillisToDate(plan.date).split('/')[1].toInt()
-                        val date = HelperMethods.convertMillisToDate(plan.date).split('/')[0].toInt()
-                        if (month == curMonth) {
-                            if (plansFromDbGroupByDate[date] == null) {
-                                plansFromDbGroupByDate[date] = mutableListOf()
-                                plansFromDbGroupByDate[date]!!.add(plan)
-                            } else {
-                                plansFromDbGroupByDate[date]!!.add(plan)
+                        plansFromDB.data.forEach { plan ->
+                            val month = HelperMethods.convertMillisToDate(plan.date).split('/')[1].toInt()
+                            val date = HelperMethods.convertMillisToDate(plan.date).split('/')[0].toInt()
+                            if (month == curMonth) {
+                                if (plansFromDbGroupByDate[date] == null) {
+                                    plansFromDbGroupByDate[date] = mutableListOf()
+                                    plansFromDbGroupByDate[date]!!.add(plan)
+                                } else {
+                                    plansFromDbGroupByDate[date]!!.add(plan)
+                                }
                             }
                         }
+
+                        plansFromDbGroupByDate.forEach {
+                            var calendar = Calendar.getInstance()
+                            calendar.set(2022, curMonth-1, 1)
+                            calendar.add(Calendar.DAY_OF_MONTH, it.key-2)
+                            var confirmed = 0
+                            var rejected = 0
+                            var send = 0
+                            it.value.forEach { itemToBuy ->
+                                if (itemToBuy.confirm == true){
+                                    confirmed ++
+                                }
+                                else if (itemToBuy.confirm == false){
+                                    rejected ++
+                                }
+                                if (itemToBuy.send){
+                                    send ++
+                                }
+                            }
+                            if (confirmed == it.value.size){
+                                events.add(EventDay(calendar, R.drawable.ic_done))
+                            }
+                            else if (rejected > 0){
+                                events.add(EventDay(calendar, R.drawable.ic_cancel))
+                            }
+                            else if (send != it.value.size){
+                                events.add(EventDay(calendar, R.drawable.ic_priority))
+                            }
+                            else if (send > 0){
+                                events.add(EventDay(calendar, R.drawable.ic_sync))
+                            }
+                        }
+                        _calendarEvents.postValue(events)
                     }
-
-                    plansFromDbGroupByDate.forEach {
-                        var calendar = Calendar.getInstance()
-                        calendar.set(2022, curMonth-1, 1)
-                        calendar.add(Calendar.DAY_OF_MONTH, it.key-2)
-                        var confirmed = 0
-                        var rejected = 0
-                        var send = 0
-                        it.value.forEach { itemToBuy ->
-                            if (itemToBuy.confirm == true){
-                                confirmed ++
-                            }
-                            else if (itemToBuy.confirm == false){
-                                rejected ++
-                            }
-                            if (itemToBuy.send){
-                                send ++
-                            }
-                        }
-                        if (confirmed == it.value.size){
-                            events.add(EventDay(calendar, R.drawable.ic_done))
-                        }
-                        else if (rejected > 0){
-                            events.add(EventDay(calendar, R.drawable.ic_cancel))
-                        }
-                        else if (send != it.value.size){
-                            events.add(EventDay(calendar, R.drawable.ic_priority))
-                        }
-                        else if (send > 0){
-                            events.add(EventDay(calendar, R.drawable.ic_sync))
-                        }
-                    }
-                    _calendarEvents.postValue(events)
                 }
-            }catch (ex: Exception){
-                Log.d("Error", ex.message.toString())
             }
         }
     }
 
     fun sendItemToBuyForParentApproval(pickedDate: Long) = viewModelScope.launch{
-        try {
-            val itemsToBuyFromDB = expensesRepository.getDaoSource().getAllItems(pickedDate, prefs.id)
 
-            val plansForApproval = mutableListOf<Plan>()
+        val itemsToBuyFromDB = expensesRepository.getDaoSource().getAllItems(pickedDate, prefs.id)
+        val plansForApproval = itemsToBuyFromDB.filter { !it.send }.map {
+            Plan(name = it.name,
+                price = it.price,
+                date = it.date,
+                confirm = it.confirm,
+                categoryId = it.categoryId,
+                childId = prefs.id,
+                dbId = it.id,
+            )
+        }
 
-            itemsToBuyFromDB.filter { !it.send }.forEach { item ->
-                val plan = Plan(name = item.name,
-                    price = item.price,
-                    date = item.date,
-                    confirm = item.confirm,
-                    categoryId = item.categoryId,
-                    childId = prefs.id,
-                    dbId = item.id,
-                )
-                plansForApproval.add(plan)
-            }
-            if (plansForApproval.size != 0) {
-                val response =
-                    expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
-                when (response) {
-                    is ApiResponse.Success -> {
-                        val sendedPlans = response.data
-                        itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
-                            expensesRepository.getItemToBuyDao().update(item.copy(send = true, remoteDbId = sendedPlans[index].id))
-                        }
-                        plansChannel.send(UiState.Success())
+        if (plansForApproval.isNotEmpty()) {
+            val response = expensesRepository.getRemoteDataSource().sendPlansForApproval(plansForApproval)
+            when (response) {
+                is ApiResponse.Success -> {
+                    val sendedPlans = response.data
+                    itemsToBuyFromDB.filter { !it.send }.forEachIndexed{ index, item ->
+                        expensesRepository.getDaoSource().updateItemToBuy(item.copy(send = true, remoteDbId = sendedPlans[index].id))
                     }
-                    is ApiResponse.Error -> {
-                        plansChannel.send(UiState.Error(Exception("Некорректные данные")))
-                    }
+                    plansChannel.send(UiState.Success())
+                }
+                is ApiResponse.Error -> {
+                    plansChannel.send(UiState.Error(Exception("Некорректные данные")))
                 }
             }
-            else{
-                plansChannel.send(UiState.Error(Exception("Все данные уже были отправлены")))
-            }
-        }catch (e: Exception){
-            plansChannel.send(UiState.Error(Exception("Ошибка получения данных!")))
-            Log.d("Error", e.message.toString())
         }
+        else{
+            plansChannel.send(UiState.Error(Exception("Все данные уже были отправлены")))
+        }
+
     }
 
     fun deleteItem(itemToBuy: ItemToBuy){
         viewModelScope.launch {
             if (itemToBuy.send) {
-                val response = expensesRepository.getRemoteDataSource().deletePlan(itemToBuy.remoteDbId!!)
-                when(response){
+                when(expensesRepository.getRemoteDataSource().deletePlan(itemToBuy.remoteDbId!!)){
                     is ApiResponse.Success -> {
-//                        _deletedItem.postValue(UiState.Success())
                         deleteItemFromLocalDb(itemToBuy)
                     }
                     is ApiResponse.Error -> {
@@ -202,9 +188,8 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
-    suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){
-        val deleteResponse = expensesRepository.getDaoSource().deleteItemToBuy(itemToBuy)
-        when(deleteResponse){
+    private suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){
+        when(expensesRepository.getDaoSource().deleteItemToBuy(itemToBuy)){
             is DaoResponse.Success -> {
                 _deletedItem.postValue(UiState.Success())
             }
@@ -214,10 +199,5 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
-//    sealed class DashboardUiState{
-//        data class Success<T>(val data: T? = null): DashboardUiState()
-//        data class Error(val message: String): DashboardUiState()
-//        object Empty: DashboardUiState()
-//    }
 
 }

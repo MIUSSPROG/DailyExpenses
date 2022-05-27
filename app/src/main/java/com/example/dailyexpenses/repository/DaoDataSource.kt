@@ -1,5 +1,6 @@
 package com.example.dailyexpenses.repository
 
+import android.util.Log
 import com.example.dailyexpenses.data.*
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -46,35 +47,19 @@ class DaoDataSource @Inject constructor(private val itemToBuyDao: ItemToBuyDao) 
         }
     }
 
-    suspend fun updateItemToBuy(itemToBuy: ItemToBuy): DaoResponse<Unit>{
-        return try {
-            val response = itemToBuyDao.update(itemToBuy)
-            DaoResponse.Success(data = response)
-        }
-        catch (e: Exception){
-            DaoResponse.Error(exception = e)
-        }
-    }
+    suspend fun updateItemToBuy(itemToBuy: ItemToBuy) = itemToBuyDao.update(itemToBuy)
 
-    suspend fun getAllItems(pickedDate: Long, userId: Int): DaoResponse<List<ItemToBuy>>{
-        return try {
-            val response = itemToBuyDao.getAllItems(pickedDate, userId)
-            DaoResponse.Success(data = response)
-        }
-        catch (e: Exception){
-            DaoResponse.Error(exception = e)
-        }
-    }
+    suspend fun getAllItems(pickedDate: Long, userId: Int) = itemToBuyDao.getAllItems(pickedDate, userId)
 
-    suspend fun getCategoryName(categoryId: Int): DaoResponse<String>{
-        return try {
-            val response = itemToBuyDao.getCatNameById(categoryId)
-            DaoResponse.Success(data = response)
-        }
-        catch (e: Exception){
-            DaoResponse.Error(exception = e)
-        }
-    }
+//    suspend fun getCategoryName(categoryId: Int): DaoResponse<String>{
+//        return try {
+//            val response = itemToBuyDao.getCatNameById(categoryId)
+//            DaoResponse.Success(data = response)
+//        }
+//        catch (e: Exception){
+//            DaoResponse.Error(exception = e)
+//        }
+//    }
 
     suspend fun getAllItemsInRange(userId: Int, fromDate: Long, toDate: Long): DaoResponse<List<HistogramData>>{
         return try {

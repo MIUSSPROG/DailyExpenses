@@ -18,21 +18,18 @@ class SignUpViewModel @ViewModelInject constructor(
 ): ViewModel() {
 
     private val _childCreationLiveData = MutableLiveData<Child?>()
-//    val childCreationLiveData: LiveData<Child?> = _childCreationLiveData
 
     private val _parentCreationLiveData = MutableLiveData<Parent?>()
-//    val parentCreationLiveData: LiveData<Parent?> = _parentCreationLiveData
 
     val userCreatedPairMediatorLiveData = PairMediatorLiveData(_childCreationLiveData, _parentCreationLiveData)
 
     fun createChild(child: Child){
         viewModelScope.launch {
-            val response = expensesRepository.getRemoteDataSource().createChildEncoded(child)
-            when(response){
+            when(val response = expensesRepository.getRemoteDataSource().createChildEncoded(child)){
                 is ApiResponse.Success -> {
                     _childCreationLiveData.postValue(response.data!!)
                     FirebaseRepository.saveToken(child.login)
-                    expensesRepository.getItemToBuyDao().createUser(User(response.data.id))
+                    expensesRepository.getDaoSource().saveUser(User(response.data.id))
                 }
                 is ApiResponse.Error ->{
                     _childCreationLiveData.postValue(null)
@@ -49,7 +46,7 @@ class SignUpViewModel @ViewModelInject constructor(
                 is ApiResponse.Success -> {
                     _parentCreationLiveData.postValue(response.data!!)
                     FirebaseRepository.saveToken(parent.login)
-                    expensesRepository.getItemToBuyDao().createUser(User(response.data.id))
+                    expensesRepository.getDaoSource().saveUser(User(response.data.id))
                 }
                 is ApiResponse.Error -> {
                     _parentCreationLiveData.postValue(null)

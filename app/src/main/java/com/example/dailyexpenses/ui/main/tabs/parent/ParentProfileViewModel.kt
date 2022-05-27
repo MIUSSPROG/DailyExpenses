@@ -1,11 +1,13 @@
 package com.example.dailyexpenses.ui.main.tabs.parent
 
 import androidx.hilt.lifecycle.ViewModelInject
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailyexpenses.api.*
 import com.example.dailyexpenses.repository.ExpensesRepository
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.prefs
 import kotlinx.coroutines.launch
 import retrofit2.Response
@@ -13,18 +15,19 @@ import retrofit2.Response
 class ParentProfileViewModel @ViewModelInject constructor(
     private val expensesRepository: ExpensesRepository
 ): ViewModel() {
-    val childrenInvitationsLiveData = MutableLiveData<ParentChildren?>()
-    val confirmInvitationLiveData = MutableLiveData<Response<Child>>()
+    private val _childrenInvitationsLiveData = MutableLiveData<UiState<ParentChildren>>()
+    val childrenInvitationsLiveData: LiveData<UiState<ParentChildren>> = _childrenInvitationsLiveData
+    private val _confirmInvitationLiveData = MutableLiveData<UiState<Response<Child>>>()
+    val confirmInvitationLiveData: LiveData<UiState<Response<Child>>> = _confirmInvitationLiveData
 
     fun getChildrenInvitations(parentId: Int){
         viewModelScope.launch {
-            val response = expensesRepository.getRemoteDataSource().getParentChildren(parentId)
-            when(response){
+            when(val response = expensesRepository.getRemoteDataSource().getParentChildren(parentId)){
                 is ApiResponse.Success -> {
-                    childrenInvitationsLiveData.postValue(response.data!!)
+                    _childrenInvitationsLiveData.postValue(UiState.Success(response.data))
                 }
                 is ApiResponse.Error -> {
-                    childrenInvitationsLiveData.postValue(null)
+                    _childrenInvitationsLiveData.postValue(UiState.Error(response.exception))
                 }
             }
         }
@@ -34,7 +37,14 @@ class ParentProfileViewModel @ViewModelInject constructor(
         viewModelScope.launch {
             val response = expensesRepository.getRemoteDataSource().confirmInvitation(child.id, ChildInvitation(
                 prefs.id, true))
-            confirmInvitationLiveData.postValue(response)
+            when(response){
+                is ApiResponse.Success -> {
+                    _confirmInvitationLiveData.postValue(UiState.Success(response.data!!))
+                }
+                is ApiResponse.Error -> {
+                    _confirmInvitationLiveData.postValue(UiState.Error(response.exception))
+                }
+            }
         }
     }
 }

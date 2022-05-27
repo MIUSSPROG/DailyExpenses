@@ -77,14 +77,14 @@ interface ServiceApi {
 //    suspend fun getChildPlans(@Path("id") id: Int): Response<ChildrenPlan>
 
     @GET("api/v1/child_plans")
-    suspend fun getChildPlans(@Query("child") childId: Int, @Query("date_min") fromDateUnix: Long, @Query("date_max") toDateUnix: Long): Response<List<Plan>>
+    suspend fun getChildPlans(@Query("child") childId: Int, @Query("date_min") fromDateUnix: Long, @Query("date_max") toDateUnix: Long, @Query("confirm") confirmed: Boolean?): Response<List<Plan>>
 
     @GET("api/v1/child_plans")
     suspend fun getAllChildPlans(@Query("child") childId: Int): Response<List<Plan>>
 
 
-    @GET("api/v1/child/filtered_plans")
-    suspend fun getFilteredPlans(@Query("mode") mode: Boolean, @Query("childId") childId: Int): List<Plan>
+//    @GET("api/v1/child/filtered_plans")
+//    suspend fun getFilteredPlans(@Query("mode") mode: Boolean, @Query("childId") childId: Int): List<Plan>
 
     @PATCH("api/v1/plan/{id}/confirm")
     suspend fun confirmPlan(@Path("id") id: Int, @Body plan: PlanConfirm): Plan

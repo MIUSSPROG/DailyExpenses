@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.dailyexpenses.R
@@ -11,6 +12,7 @@ import com.example.dailyexpenses.data.DiagramData
 import com.example.dailyexpenses.data.HistogramData
 import com.example.dailyexpenses.databinding.FragmentDiagramBinding
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDate
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.XAxisDateFormatter
 import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.data.*
@@ -33,11 +35,26 @@ class DiagramFragment: Fragment(R.layout.fragment_diagram) {
         binding.btnSetDateRange.setOnClickListener { showDateRange() }
 
         viewModel.dataForHistogram.observe(viewLifecycleOwner){
-            showBarChart(it)
+            when(it){
+                is UiState.Success -> {
+                    it.data?.let { it1 -> showBarChart(it1) }
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), "Ошибка получения данных для гистограммы!", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         viewModel.dataForDiagram.observe(viewLifecycleOwner){
-            showPieChart(it)
+            when(it){
+                is UiState.Success -> {
+                    it.data?.let { it1 -> showPieChart(it1) }
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), "Ошибка получения данных для диаграммы!", Toast.LENGTH_SHORT).show()
+                }
+            }
+
         }
     }
 
@@ -97,9 +114,4 @@ class DiagramFragment: Fragment(R.layout.fragment_diagram) {
         }
     }
 
-//    private fun convertLongToDate(time: Long): String{
-//        val date = Date(time)
-//        val format = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-//        return format.format(date)
-//    }
 }

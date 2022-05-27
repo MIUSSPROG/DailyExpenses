@@ -119,8 +119,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             when (it) {
                 is UiState.Success<*> -> {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
-//                    val calendar = Calendar.getInstance()
-//                    val curMonth = HelperMethods.convertMillisToDate(calendar.timeInMillis).split('/')[1].toInt()
                     viewModel.setCalendarEvents(curMonth)
                 }
                 is UiState.Error<*> -> {
@@ -138,7 +136,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
                 viewModel.plansChannelFlow.collect {
                     when (it) {
-                        is DashboardViewModel.UiState.Success<*> -> {
+                        is UiState.Success<*> -> {
                             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                             Toast.makeText(
                                 requireContext(),
@@ -147,7 +145,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                             ).show()
                             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                         }
-                        is DashboardViewModel.DashboardUiState.Error -> {
+                        is UiState.Error -> {
                             Toast.makeText(
                                 requireContext(),
                                 "Данные уже были отправлены!",
@@ -174,11 +172,11 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
         viewModel.deletedItem.observe(viewLifecycleOwner){
             when(it){
-                is DashboardViewModel.DashboardUiState.Success<*> -> {
+                is UiState.Success<*> -> {
                     Toast.makeText(requireContext(), "Элемент удален!", Toast.LENGTH_SHORT).show()
                     viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
                 }
-                is DashboardViewModel.DashboardUiState.Error -> {
+                is UiState.Error -> {
                     Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
                 }
             }

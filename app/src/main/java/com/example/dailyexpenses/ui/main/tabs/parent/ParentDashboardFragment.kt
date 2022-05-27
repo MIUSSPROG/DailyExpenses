@@ -8,14 +8,18 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.dailyexpenses.R
+import com.example.dailyexpenses.api.ApiResponse
 import com.example.dailyexpenses.api.Child
 import com.example.dailyexpenses.api.PlanRV
 import com.example.dailyexpenses.data.ChildPlanActionListener
 import com.example.dailyexpenses.data.ChildPlanAdapter
 import com.example.dailyexpenses.databinding.FragmentParentDashboardBinding
 import com.example.dailyexpenses.utils.HelperMethods
+import com.example.dailyexpenses.utils.UiState
 import com.google.android.material.datepicker.MaterialDatePicker
 import dagger.hilt.android.AndroidEntryPoint
+import java.lang.Float.NEGATIVE_INFINITY
+import java.lang.Float.POSITIVE_INFINITY
 
 @AndroidEntryPoint
 class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
@@ -25,8 +29,8 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
     private lateinit var children: List<Child>
     private var selectedChild: Child? = null
     private lateinit var childPlanAdapter: ChildPlanAdapter
-    private var firstDateUnixMillis: Long = 0
-    private var secondDateUnixMillis: Long = 0
+    private var firstDateUnixMillis: Long = NEGATIVE_INFINITY.toLong()
+    private var secondDateUnixMillis: Long = POSITIVE_INFINITY.toLong()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -35,11 +39,13 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
         binding.apply {
 
             btnCancelPeriod.setOnClickListener {
-                firstDateUnixMillis = 0
-                secondDateUnixMillis = 0
-                tvDateRangeParent.text = ""
-                switchStatusHandle()
-                allCheckedHandle()
+                if (firstDateUnixMillis != NEGATIVE_INFINITY.toLong() && secondDateUnixMillis != POSITIVE_INFINITY.toLong()){
+                    firstDateUnixMillis = NEGATIVE_INFINITY.toLong()
+                    secondDateUnixMillis = POSITIVE_INFINITY.toLong()
+                    tvDateRangeParent.text = ""
+                    switchStatusHandle()
+                    allCheckedHandle()
+                }
             }
 
             btnChoosePeriod.setOnClickListener {
@@ -54,7 +60,7 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
                 dateRangePicker.addOnPositiveButtonClickListener { datePicked ->
                     firstDateUnixMillis = datePicked.first
-                    secondDateUnixMillis = datePicked.second
+                    secondDateUnixMillis = datePicked.second + 24 * 60 * 60 * 1000
                     val startDate = HelperMethods.convertMillisToDate(firstDateUnixMillis)
                     val endDate = HelperMethods.convertMillisToDate(secondDateUnixMillis)
                     tvDateRangeParent.text = "$startDate - $endDate"
@@ -69,11 +75,11 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
             swipeToRefreshParent.setOnRefreshListener {
                 swipeToRefreshParent.setColorSchemeColors(resources.getColor(R.color.color1))
                 if (switchStatus.isEnabled){
-                    selectedChild?.let { child -> viewModel.filterPlans(child.id, switchStatus.isChecked, firstDateUnixMillis, secondDateUnixMillis) }
+                    selectedChild?.let { child -> viewModel.getChildrenPlans(child.id, switchStatus.isChecked, firstDateUnixMillis, secondDateUnixMillis) }
                     swipeToRefreshParent.isRefreshing = false
                 }
                 else {
-                    selectedChild?.let { viewModel.getChildrenPlans(it.id, firstDateUnixMillis, secondDateUnixMillis) }
+                    selectedChild?.let { viewModel.getChildrenPlans(it.id, null, firstDateUnixMillis, secondDateUnixMillis) }
                     swipeToRefreshParent.isRefreshing = false
                 }
             }
@@ -81,29 +87,27 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
         childPlanAdapter = ChildPlanAdapter(object : ChildPlanActionListener {
             override fun confirmPlan(planRV: PlanRV) {
-                viewModel.confirmChildPlan(planRV)
+                viewModel.changeChildPlanConfirmation(planRV, true)
             }
 
             override fun rejectPlan(planRV: PlanRV) {
-                viewModel.rejectChildPlan(planRV)
+                viewModel.changeChildPlanConfirmation(planRV, false)
             }
         })
 
-        viewModel.planRejected.observe(viewLifecycleOwner) { planRejected ->
-            if (planRejected) {
-                viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
-                Toast.makeText(requireContext(), "Запрос отклонен", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Ошибка отклонения", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        viewModel.planConfirmed.observe(viewLifecycleOwner) { planConfirmed ->
-            if (planConfirmed) {
-                viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
-                Toast.makeText(requireContext(), "Запрос подтвержден", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(requireContext(), "Ошибка подтверждения", Toast.LENGTH_SHORT).show()
+        viewModel.planConfirmation.observe(viewLifecycleOwner) { status ->
+            when(status) {
+                is UiState.Success -> {
+                    viewModel.getChildrenPlans(
+                        selectedChild!!.id,
+                        if (binding.cbAllChecked.isChecked) null else binding.switchStatus.isChecked,
+                        firstDateUnixMillis,
+                        secondDateUnixMillis
+                    )
+                    Toast.makeText(requireContext(), "Запрос подтвержден!", Toast.LENGTH_SHORT)
+                        .show()
+                }
+                is UiState.Error -> Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -122,11 +126,19 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
 
         binding.actvChildrenToChoose.setOnItemClickListener { adapterView, view, position, id ->
             selectedChild = children[position]
-            viewModel.getChildrenPlans(selectedChild!!.id, firstDateUnixMillis, secondDateUnixMillis)
+            viewModel.getChildrenPlans(selectedChild!!.id, null,  firstDateUnixMillis, secondDateUnixMillis)
         }
 
         viewModel.childPlans.observe(viewLifecycleOwner) {
-                childPlanAdapter.submitList(it)
+            when(it){
+                is UiState.Success -> {
+                    childPlanAdapter.submitList(it.data)
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), "Ошибка получения данных!", Toast.LENGTH_SHORT).show()
+                }
+            }
+
         }
 
         binding.rvChildPlans.apply {
@@ -141,21 +153,12 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
             if (cbAllChecked.isChecked) {
                 switchStatus.isEnabled = false
                 selectedChild?.let { child ->
-                    viewModel.getChildrenPlans(
-                        child.id,
-                        firstDateUnixMillis,
-                        secondDateUnixMillis
-                    )
+                    viewModel.getChildrenPlans(child.id, null, firstDateUnixMillis, secondDateUnixMillis)
                 }
             } else {
                 switchStatus.isEnabled = true
                 selectedChild?.let { child ->
-                    viewModel.filterPlans(
-                        child.id,
-                        switchStatus.isChecked,
-                        firstDateUnixMillis,
-                        secondDateUnixMillis
-                    )
+                    viewModel.getChildrenPlans(child.id, switchStatus.isChecked, firstDateUnixMillis, secondDateUnixMillis)
                 }
             }
         }
@@ -168,20 +171,11 @@ class ParentDashboardFragment : Fragment(R.layout.fragment_parent_dashboard) {
             } else {
                 switchStatus.text = "отклоненные"
             }
+
             selectedChild?.let { child ->
-                viewModel.filterPlans(
-                    child.id,
-                    switchStatus.isChecked,
-                    firstDateUnixMillis,
-                    secondDateUnixMillis
-                )
+                viewModel.getChildrenPlans(child.id, switchStatus.isChecked, firstDateUnixMillis, secondDateUnixMillis)
             }
         }
     }
 
-//    companion object{
-//        const val ACCEPTED = "одобренные"
-//        const val REJECTED = "отклоненные"
-//        const val ALL = "все"
-//    }
 }
