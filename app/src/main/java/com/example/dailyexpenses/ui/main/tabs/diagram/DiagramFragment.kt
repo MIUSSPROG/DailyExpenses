@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.dailyexpenses.R
@@ -14,6 +15,7 @@ import com.example.dailyexpenses.databinding.FragmentDiagramBinding
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDate
 import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.XAxisDateFormatter
+import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.LegendEntry
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.utils.ColorTemplate
@@ -30,6 +32,12 @@ class DiagramFragment: Fragment(R.layout.fragment_diagram) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (savedInstanceState != null){
+            firstDateUnixMillis = savedInstanceState.getLong("firstDateUnix")
+            secondDateUnixMillis = savedInstanceState.getLong("secondDateUnix")
+        }
+
         binding = FragmentDiagramBinding.bind(view)
 
         binding.btnSetDateRange.setOnClickListener { showDateRange() }
@@ -58,15 +66,27 @@ class DiagramFragment: Fragment(R.layout.fragment_diagram) {
         }
     }
 
-    private fun showPieChart(data: List<DiagramData>){
-        val entries = mutableListOf<PieEntry>()
-        data.forEach { diagramData ->
-            entries.add(PieEntry(diagramData.categoryId.toFloat(), diagramData.sumPrice))
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        if (outState != null){
+            outState.putLong("firstDateUnix", firstDateUnixMillis)
+            outState.putLong("secondDateUnix", secondDateUnixMillis)
         }
-        val pieDataset = PieDataSet(entries, "PieCells")
+    }
+
+    private fun showPieChart(data: List<DiagramData>){
+
+        val entries = data.map { PieEntry(it.sumPrice, it.category) }
+//        val entries = mutableListOf<PieEntry>()
+//        data.forEach { diagramData ->
+//            entries.add(PieEntry(diagramData.sumPrice, diagramData.category))
+//        }
+        val pieDataset = PieDataSet(entries,"")
         pieDataset.colors = ColorTemplate.MATERIAL_COLORS.toList()
         val pieData = PieData(pieDataset)
 //        pieData.setValueFormatter(PieAxisCategoryNameFormatter())
+        binding.itemsToBuyPieChart.setDrawEntryLabels(false)
+        binding.itemsToBuyPieChart.description.text = "Планы по категориям"
         binding.itemsToBuyPieChart.data = pieData
         binding.itemsToBuyPieChart.animateY(1000)
         binding.itemsToBuyPieChart.invalidate()
@@ -83,9 +103,10 @@ class DiagramFragment: Fragment(R.layout.fragment_diagram) {
             entries.add(BarEntry(day, diagramData.sumPrice))
         }
 
-        val barDataset = BarDataSet(entries, "Cells")
-        barDataset.colors = ColorTemplate.MATERIAL_COLORS.toList()
+        val barDataset = BarDataSet(entries, "Сумма за день")
+        barDataset.colors = listOf(ContextCompat.getColor(requireContext(), R.color.color1))
         val barData = BarData(barDataset)
+        binding.itemsToBuyBarChart.description.text = "Планы за период"
         binding.itemsToBuyBarChart.data = barData
 //        binding.itemsToBuyBarChart.xAxis.valueFormatter = XAxisDateFormatter()
         binding.itemsToBuyBarChart.animateY(1000)

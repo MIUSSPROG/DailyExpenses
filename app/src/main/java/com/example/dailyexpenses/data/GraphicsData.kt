@@ -6,7 +6,7 @@ data class HistogramData(
 )
 
 data class DiagramData(
-    val categoryId: Int,
+    val category: String,
     val sumPrice: Float
 )
 

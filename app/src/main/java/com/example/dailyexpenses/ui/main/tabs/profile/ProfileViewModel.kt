@@ -39,9 +39,6 @@ class ProfileViewModel @ViewModelInject constructor(
     private val _checkChildParentLiveData = MutableLiveData<UiState<ChildParent>>()
     val checkChildParentLiveData: LiveData<UiState<ChildParent>> = _checkChildParentLiveData
 
-//    private val _cancelInvitationLiveData = MutableLiveData<UiState<Child>>()
-//    val cancelInvitationLiveData: LiveData<UiState<Child>> = _cancelInvitationLiveData
-
     private val _checkChildParentChannel = Channel<UiState<Nothing>>()
     val checkChildParentChannelFlow = _checkChildParentChannel.receiveAsFlow()
 

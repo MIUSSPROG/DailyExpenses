@@ -56,9 +56,9 @@ interface ItemToBuyDao {
     @Query("SELECT date, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate AND userRemoteId = :userId GROUP BY date")
     suspend fun getAllItemsInRange2(userId: Int, fromDate: Long, toDate: Long): List<HistogramData>
 
-    @Query("SELECT categoryId, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate AND userRemoteId = :userId GROUP BY categoryId")
+    @Query("SELECT category, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate AND userRemoteId = :userId GROUP BY categoryId")
     fun getAllItemsByCategory(userId: Int, fromDate: Long, toDate: Long): Flow<List<DiagramData>>
 
-    @Query("SELECT categoryId, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate AND userRemoteId = :userId GROUP BY categoryId")
+    @Query("SELECT category, SUM(price) as 'sumPrice' FROM ItemToBuy WHERE date BETWEEN :fromDate AND :toDate AND userRemoteId = :userId GROUP BY categoryId")
     suspend fun getAllItemsByCategory2(userId: Int, fromDate: Long, toDate: Long): List<DiagramData>
 }
