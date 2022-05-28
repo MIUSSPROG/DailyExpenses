@@ -1,5 +1,6 @@
 package com.example.dailyexpenses.repository
 
+import android.util.Log
 import com.example.dailyexpenses.api.*
 import kotlinx.coroutines.flow.Flow
 import okhttp3.MultipartBody
@@ -15,7 +16,14 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
 
     suspend fun getCategories() = serviceApi.getCategories()
 
-    suspend fun getParents() = serviceApi.getParents()
+    suspend fun getParents(): ApiResponse<List<Parent>>{
+        return try {
+            val response = serviceApi.getParents()
+            ApiResponse.Success(response.body()!!)
+        }catch (e: Exception){
+            ApiResponse.Error(e)
+        }
+    }
 
     suspend fun createParentEncoded(parentPost: Parent): ApiResponse<Parent>{
         return try{
@@ -60,9 +68,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         return try {
             val response = serviceApi.sendPlansForApproval(plans)
             ApiResponse.Success(data = response.body()!!)
-        }catch (e: HttpException){
-            ApiResponse.Error(exception = e)
-        }catch (e: IOException){
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
             ApiResponse.Error(exception = e)
         }
     }
@@ -77,9 +84,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         return try {
             val response = serviceApi.confirmPlan(id, plan)
             ApiResponse.Success(data = response)
-        }catch (e: HttpException){
-            ApiResponse.Error(exception = e)
-        }catch (e: IOException){
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
             ApiResponse.Error(exception = e)
         }
     }
@@ -88,29 +94,69 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         return try {
             serviceApi.deletePlan(planId)
             ApiResponse.Success(data = 204)
-        }catch (e: HttpException){
-            ApiResponse.Error(exception = e)
-        }catch (e: IOException){
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
             ApiResponse.Error(exception = e)
         }
     }
 
-    suspend fun sendInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.sendInvitation(id, childInvitation)
+    suspend fun sendInvitation(id: Int, childInvitation: ChildInvitation): ApiResponse<Child>{
+        return try {
+            val response = serviceApi.sendInvitation(id, childInvitation)
+            ApiResponse.Success(response.body()!!)
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
+            ApiResponse.Error(e)
+        }
+    }
 
-    suspend fun checkInvitation(parentId: Int, childLogin: String) = serviceApi.checkInvitation(parentId, childLogin)
+    suspend fun checkInvitation(parentId: Int, childLogin: String): ApiResponse<Child>{
+        return try {
+            val response = serviceApi.checkInvitation(parentId, childLogin)
+            ApiResponse.Success(response.body()!!)
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
+            ApiResponse.Error(e)
+        }
+    }
 
     suspend fun confirmInvitation(id: Int, childInvitation: ChildInvitation): ApiResponse<Response<Child>>{
         return try{
             val response = serviceApi.confirmInvitation(id, childInvitation)
             ApiResponse.Success(response)
         }catch (e: Exception){
+            Log.d("Error", e.message.toString())
             ApiResponse.Error(e)
         }
     }
 
-    suspend fun cancelInvitation(id: Int, childInvitation: ChildInvitation) = serviceApi.confirmInvitation(id, childInvitation)
+    suspend fun cancelInvitation(id: Int, childInvitation: ChildInvitation): ApiResponse<Child>{
+        return try{
+            val response = serviceApi.confirmInvitation(id, childInvitation)
+            ApiResponse.Success(response.body()!!)
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
+            ApiResponse.Error(e)
+        }
+    }
 
-    suspend fun checkParent(login: String) = serviceApi.checkParent(login)
+    suspend fun checkParent(login: String): ApiResponse<Parent?>{
+        return try {
+            val response = serviceApi.checkParent(login)
+            ApiResponse.Success(response.body())
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
+            ApiResponse.Error(e)
+        }
+    }
 
-    suspend fun checkChildParent(login: String) = serviceApi.checkChildParent(login)
+    suspend fun checkChildParent(login: String): ApiResponse<ChildParent>{
+        return try {
+            val response = serviceApi.checkChildParent(login)
+            ApiResponse.Success(response.body()!!)
+        }catch (e: Exception){
+            Log.d("Error", e.message.toString())
+            ApiResponse.Error(e)
+        }
+    }
 }

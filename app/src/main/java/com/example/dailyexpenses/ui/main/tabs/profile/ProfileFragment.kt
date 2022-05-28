@@ -6,14 +6,20 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.navOptions
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.api.ChildParent
 import com.example.dailyexpenses.api.Parent
 import com.example.dailyexpenses.databinding.FragmentProfileBinding
+import com.example.dailyexpenses.utils.UiState
 import com.example.dailyexpenses.utils.findTopNavController
 import com.example.dailyexpenses.utils.prefs
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
@@ -27,60 +33,95 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         binding = FragmentProfileBinding.bind(view)
         binding.tvLogin.text = prefs.login
 
-        viewModel.getParents()
         viewModel.checkChildParent(prefs.login)
-
-        viewModel.checkChildParentLiveData.observe(viewLifecycleOwner){ childParent ->
-            if (childParent.confirmed) pinParent(childParent) else unpinParent()
+        viewModel.checkChildParentLiveData.observe(viewLifecycleOwner){ response ->
+            when(response){
+                is UiState.Success -> {
+                    if (response.data!!.confirmed) pinParent(response.data!!) else unpinParent()
+                }
+                is UiState.Error -> {
+                    Toast.makeText(requireContext(), response.exception.message.toString(), Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
-        viewModel.cancelInvitationLiveData.observe(viewLifecycleOwner){
-            unpinParent()
-            Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.checkChildParentChannelFlow.collect {
+                    when(it){
+                        is UiState.Success -> {
+                            unpinParent()
+                            Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT).show()
+                        }
+                        is UiState.Error -> {
+                            Toast.makeText(requireContext(), "Ошибка открепления!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
         }
-//        lifecycleScope.launchWhenCreated {
-//            viewModel.cancelInvitationStateFlow.collect {
-//                unpinParent()
-//                Toast.makeText(requireContext(), "Родитель откреплен!", Toast.LENGTH_SHORT).show()
-//            }
-//        }
 
-        viewModel.parentsLiveData.observe(viewLifecycleOwner){ parents ->
-            var adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, parents)
-            binding.autoEtParentUsername.apply {
-                setAdapter(adapter)
-                threshold = 2
-                setOnItemClickListener { adapterView, view, pos, id ->
-                    selectedParent = adapter.getItem(pos)
+
+        viewModel.getParents()
+        viewModel.parentsLiveData.observe(viewLifecycleOwner){ response ->
+            when(response){
+                is UiState.Success -> {
+                    var adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, response.data!!)
+                    binding.autoEtParentUsername.apply {
+                        setAdapter(adapter)
+                        threshold = 2
+                        setOnItemClickListener { adapterView, view, pos, id ->
+                            selectedParent = adapter.getItem(pos)
+                        }
+                    }
                 }
             }
         }
 
         binding.btnSendInvitationToParent.setOnClickListener {
             binding.autoEtParentUsername.setText("")
-            viewModel.checkInvitationLiveData.observe(viewLifecycleOwner){ code ->
-                if (code == 200){
-                    Toast.makeText(requireContext(), "Приглашение $selectedParent уже было отправлено", Toast.LENGTH_SHORT).show()
-                }
-            }
+
             if (selectedParent == null){
                 val parentLoginToCheck = binding.autoEtParentUsername.text.toString()
                 viewModel.checkParent(parentLoginToCheck)
             }else{
-                viewModel.sendInvitation(selectedParent!!)
+                viewModel.checkInvitation(selectedParent!!)
             }
 
-            viewModel.checkParentLiveData.observe(viewLifecycleOwner){ parent ->
-                if (parent == null){
-                    Toast.makeText(requireContext(), "такого родителя не существует", Toast.LENGTH_SHORT).show()
-                } else{
-                    viewModel.sendInvitation(parent)
+            viewModel.checkInvitationLiveData.observe(viewLifecycleOwner){ response ->
+                when(response){
+                    is UiState.Success -> {
+                        Toast.makeText(requireContext(), "Приглашение $selectedParent уже было отправлено", Toast.LENGTH_SHORT).show()
+                    }
+                    is UiState.Error -> {
+                        viewModel.sendInvitation(selectedParent!!)
+                    }
+                }
+            }
+
+            viewModel.checkParentLiveData.observe(viewLifecycleOwner){ response ->
+                when(response){
+                    is UiState.Success -> {
+                        if (response.data == null){
+                            Toast.makeText(requireContext(), "Такого родителя не существует", Toast.LENGTH_SHORT).show()
+                        }else {
+                            viewModel.checkInvitation(response.data)
+                        }
+                    }
+                    is UiState.Error -> {
+                        Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
             viewModel.fcmLiveData.observe(viewLifecycleOwner){
-                if (it.success == 1){
-                    Toast.makeText(requireContext(), "Приглашение успешно отправлено!", Toast.LENGTH_SHORT).show()
+                when(it){
+                    is UiState.Success -> {
+                        Toast.makeText(requireContext(), "Приглашение успешно отправлено!", Toast.LENGTH_SHORT).show()
+                    }
+                    is UiState.Error -> {
+                        Toast.makeText(requireContext(), "Произошла ошибка отправки! ${it.exception.message}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

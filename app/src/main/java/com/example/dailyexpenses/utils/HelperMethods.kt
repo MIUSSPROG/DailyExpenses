@@ -28,6 +28,7 @@ sealed class UiState<T>(
     exception: Exception? = null
 ){
     data class Success<T>(val data: T? = null): UiState<T>(data, null)
+    data class Failure<T>(val data: T? = null): UiState<T>(data, null)
     data class Error<T>(val exception: Exception): UiState<T>(null, exception)
 }
 
