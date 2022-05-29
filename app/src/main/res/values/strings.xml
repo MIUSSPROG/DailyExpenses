@@ -9,6 +9,12 @@
     <string name="material_calendar_saturday">Сб</string>
     <string name="material_calendar_sunday">Вс</string>
 
+    <string name="read_storage_permission_granted">Разрешение на чтение данных одобрено!</string>
+    <string name="permissions_denied_forever">Разрешение отклонено навсегда!</string>
+    <string name="permission_denied">Разрешение отклонено!</string>
+    <string name="permission_denied_forever_message">Разрешение отклонено навсегда. Вы можете внести изменения в настройках приложения.\n\n Хотите открыть настройки?</string>
+    <string name="open">Открыть</string>
+
     <array name="material_calendar_months_array">
         <item>Январь</item>
         <item>Февраль</item>

@@ -1,5 +1,6 @@
 package com.example.dailyexpenses.ui.main.tabs.dashboard
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.LiveData
@@ -21,6 +22,12 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.asRequestBody
+import java.io.File
 import java.util.*
 import kotlin.Exception
 
@@ -37,9 +44,6 @@ class DashboardViewModel @ViewModelInject constructor(
     private val _itemsToBuy = MutableLiveData<UiState<List<ItemToBuy>>>()
     val itemsToBuy: LiveData<UiState<List<ItemToBuy>>> = _itemsToBuy
 
-//    private val _deletedItem = MutableLiveData<UiState<Nothing>>()
-//    val deletedItem: LiveData<UiState<Nothing>> = _deletedItem
-
     private val _deletedItemChannel = Channel<UiState<Nothing>>()
     val deletedItemChannelFlow = _deletedItemChannel.receiveAsFlow()
 
@@ -48,6 +52,11 @@ class DashboardViewModel @ViewModelInject constructor(
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         _itemsToBuy.postValue(UiState.Error(throwable as Exception))
+        Log.d("Error", throwable.message.toString())
+    }
+
+    private val exceptionSendImageHandler = CoroutineExceptionHandler { _, throwable ->
+        _updatedItem.postValue(UiState.Error(exception = Exception("Ошибка")))
         Log.d("Error", throwable.message.toString())
     }
 
@@ -195,17 +204,18 @@ class DashboardViewModel @ViewModelInject constructor(
     }
 
     fun updateItem(itemToBuy: ItemToBuy){
-        viewModelScope.launch {
-            when(expensesRepository.getDaoSource().updateItemToBuy(itemToBuy)){
-                is DaoResponse.Success -> {
-                    _updatedItem.postValue(UiState.Success())
-                }
-                is DaoResponse.Error -> {
-                    _updatedItem.postValue(UiState.Error(Exception("Ошибка обновления данных!")))
-                }
+        viewModelScope.launch(exceptionSendImageHandler) {
+            val imagePart: MultipartBody.Part? = null
+            if (itemToBuy != null){
+                val file = File(itemToBuy.imageUri)
+                val imagePart = MultipartBody.Part.createFormData("image", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))
+
+            }
+            coroutineScope {
+                expensesRepository.getDaoSource().updateItemToBuy(itemToBuy) }
+                expensesRepository.getRemoteDataSource().saveImageForPlan(itemToBuy.remoteDbId!!, imagePart)
             }
         }
-    }
 
     private suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){
         when(expensesRepository.getDaoSource().deleteItemToBuy(itemToBuy)){

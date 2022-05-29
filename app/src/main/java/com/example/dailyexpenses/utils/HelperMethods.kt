@@ -1,5 +1,11 @@
 package com.example.dailyexpenses.utils
 
+import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
+import android.text.TextUtils
 import com.github.mikephil.charting.components.AxisBase
 import com.github.mikephil.charting.formatter.ValueFormatter
 import java.text.SimpleDateFormat
@@ -19,6 +25,22 @@ class HelperMethods {
         fun convertMillisToDateMills(millis: Long): Long{
             val tmp = convertMillisToDate(millis)
             return convertDateToMillis(tmp)
+        }
+
+        fun getRealPathFromURI(context: Context, imageURI: Uri): String?{
+            var cursor: Cursor? = null
+            try {
+                cursor = context.contentResolver.query(imageURI, arrayOf(MediaStore.MediaColumns.DISPLAY_NAME), null, null, null)
+                cursor!!.moveToNext()
+                val fileName = cursor.getString(0)
+                val path = Environment.getExternalStorageDirectory().toString() + "/Download/" + fileName
+                if (!TextUtils.isEmpty(path)) {
+                    return path
+                }
+            } finally {
+                cursor?.close()
+            }
+            return null
         }
     }
 }

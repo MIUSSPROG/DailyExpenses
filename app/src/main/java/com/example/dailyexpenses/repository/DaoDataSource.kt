@@ -47,15 +47,7 @@ class DaoDataSource @Inject constructor(private val itemToBuyDao: ItemToBuyDao) 
         }
     }
 
-    suspend fun updateItemToBuy(itemToBuy: ItemToBuy): DaoResponse<Unit>{
-        return try {
-            val response = itemToBuyDao.update(itemToBuy)
-            DaoResponse.Success(response)
-        }catch (e: Exception){
-            Log.d("Error", e.message.toString())
-            DaoResponse.Error(e)
-        }
-    }
+    suspend fun updateItemToBuy(itemToBuy: ItemToBuy) = itemToBuyDao.update(itemToBuy)
 
     suspend fun getAllItems(pickedDate: Long, userId: Int) = itemToBuyDao.getAllItems(pickedDate, userId)
 

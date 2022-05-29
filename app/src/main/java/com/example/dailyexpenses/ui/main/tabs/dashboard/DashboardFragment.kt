@@ -1,8 +1,14 @@
 package com.example.dailyexpenses.ui.main.tabs.dashboard
 
+import android.Manifest
 import android.app.Activity.RESULT_OK
+import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -31,10 +37,12 @@ import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Com
 import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.REQUEST_CODE
 import com.example.dailyexpenses.utils.HelperMethods
 import com.example.dailyexpenses.utils.HelperMethods.Companion.convertMillisToDateMills
+import com.example.dailyexpenses.utils.HelperMethods.Companion.getRealPathFromURI
 import com.example.dailyexpenses.utils.UiState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
 import java.lang.Math.abs
 import java.util.*
 import kotlin.properties.Delegates
@@ -48,23 +56,68 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     private var curMonth by Delegates.notNull<Int>()
     private var selectedItemToBuy: ItemToBuy? = null
     private val viewModel: DashboardViewModel by viewModels()
-//    var resultLauncher = registerForActivityResult(GetContent()){
-//            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
-////            viewModel.updateItem()
-//    }
-    var resultLauncher = registerForActivityResult(StartActivityForResult()){
-        if (it.resultCode == RESULT_OK){
-            val data = it.data?.data
-            selectedItemToBuy?.let { it1 -> viewModel.updateItem(it1.copy(imageUri = data.toString())) }
+
+    private var resultLauncher = registerForActivityResult(StartActivityForResult()){
+        if (it.resultCode == RESULT_OK && it.data!= null && it.data!!.data != null){
+            val uri = it.data!!.data!!
+//            val realPath = getRealPathFromURI(requireContext(), uri)
+            val realPath = RealPathUtil.getRealPath(requireContext(), uri)
+//            Log.d("path", realPath.toString())
+//            Log.d("path", realPath2.toString())
+//            val bitmap = BitmapFactory.decodeFile(realPath)
+//            Log.d("bitmap", bitmap.toString())
+//            Log.d("uri", getRealPathFromURI(requireContext(), uri))
+//            Log.d("bitmap", uri.path!!)
+//            var os = ByteArrayOutputStream()
+//            var inputStream = requireActivity().contentResolver.openInputStream(uri)
+//            if (inputStream != null) {
+//                var byteArray = inputStream.readBytes()
+            selectedItemToBuy?.let { it1 -> viewModel.updateItem(it1.copy(imageUri = realPath))}
+//            }
         }
     }
+
+    private val requestReadStoragePermissionLauncher = registerForActivityResult(
+        RequestPermission(),
+        ::onGotReadStoragePermission
+    )
+
+    private fun onGotReadStoragePermission(granted: Boolean){
+        if (granted){
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            resultLauncher.launch(intent)
+        }else{
+            if (!shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)){
+                askUserForOpeningAppSettings()
+            }else{
+                Toast.makeText(requireContext(), R.string.permission_denied, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun askUserForOpeningAppSettings(){
+        val appSettingsIntent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", requireActivity().packageName, null)
+        )
+        if (requireActivity().packageManager.resolveActivity(appSettingsIntent, PackageManager.MATCH_DEFAULT_ONLY) == null){
+            Toast.makeText(requireContext(), R.string.permissions_denied_forever, Toast.LENGTH_SHORT).show()
+        }else{
+            AlertDialog.Builder(requireContext())
+                .setTitle(R.string.permission_denied)
+                .setMessage(R.string.permission_denied_forever_message)
+                .setPositiveButton(R.string.open){ _, _ ->
+                    startActivity(appSettingsIntent)
+                }.create().show()
+        }
+    }
+
     private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter(object:
         PhotoAttachmentActionListener {
         override fun attachPhoto(itemToBuy: ItemToBuy) {
             selectedItemToBuy = itemToBuy
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            resultLauncher.launch(intent)
+            requestReadStoragePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
         }
 
         override fun detachPhoto(itemToBuy: ItemToBuy) {
@@ -160,7 +213,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
                     viewModel.setCalendarEvents(curMonth)
                 }
-                is UiState.Error<*> -> {
+                is UiState.Error -> {
                     Toast.makeText(
                         requireContext(),
                         "Не удалось получить данные!",
@@ -252,4 +305,5 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
         itemTouchHelper.attachToRecyclerView(binding.rvDateItems)
     }
+
 }

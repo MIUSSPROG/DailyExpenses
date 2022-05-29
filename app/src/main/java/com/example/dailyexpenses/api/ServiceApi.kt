@@ -56,15 +56,11 @@ interface ServiceApi {
         @Query("password") password: String
     ): Response<Parent?>
 
+//    @Part("name") name: String,
     @Multipart
-    @POST("api/v1/plan")
-    suspend fun createPlan(
-        @Part("name") name: String,
-        @Part("price") price: Float,
-        @Part("date") date: String,
-        @Part("confirm") confirm: Boolean,
-        @Part("category") categoryId: Int,
-        @Part("child") childId: Int,
+    @PATCH("api/v1/plan/update/{id}")
+    suspend fun saveImageForPlan(
+        @Path("id") id: Int,
         @Part image: MultipartBody.Part?
     ): ResponseBody
 

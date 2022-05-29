@@ -1,6 +1,4 @@
 package com.example.dailyexpenses.api
-
-import com.example.dailyexpenses.data.ItemToBuy
 import com.google.gson.annotations.SerializedName
 import okhttp3.MultipartBody
 
@@ -10,7 +8,7 @@ abstract class PlanTemplate {
     abstract val price: Float
     abstract val date: Long
     abstract val confirm: Boolean?
-    abstract val image: MultipartBody.Part?
+    abstract val image: String?
 }
 
 data class Plan(
@@ -23,7 +21,7 @@ data class Plan(
     val categoryId: Int = -1,
     @SerializedName("child")
     val childId: Int = -1,
-    override val image: MultipartBody.Part? = null,
+    override val image: String? = null,
     @SerializedName("db_id")
     val dbId: Int = -1
 ) : PlanTemplate()
@@ -35,7 +33,7 @@ data class PlanRV(
     override val date: Long,
     override val confirm: Boolean?,
     val categoryName: String,
-    override val image: MultipartBody.Part? = null
+    override val image: String? = null
 ): PlanTemplate()
 
 data class PlanConfirm(

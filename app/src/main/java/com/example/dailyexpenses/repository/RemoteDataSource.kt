@@ -74,6 +74,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
         }
     }
 
+    suspend fun saveImageForPlan(planId: Int, image: MultipartBody.Part?) = serviceApi.saveImageForPlan(planId, image)
+
     suspend fun getChildPlans(id: Int, fromDateUnix: Long, toDateUnix: Long, confirmed: Boolean? = null) = serviceApi.getChildPlans(childId = id, fromDateUnix = fromDateUnix, toDateUnix = toDateUnix, confirmed=confirmed)
 
 //    suspend fun getAllChildPlans(id: Int) = serviceApi.getAllChildPlans(childId = id)
@@ -89,6 +91,8 @@ class RemoteDataSource @Inject constructor(private val serviceApi: ServiceApi) {
             ApiResponse.Error(exception = e)
         }
     }
+
+//    suspend fun saveImageForPlan()
 
     suspend fun deletePlan(planId: Int): ApiResponse<Int>{
         return try {
