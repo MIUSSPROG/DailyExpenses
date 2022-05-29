@@ -37,8 +37,14 @@ class DashboardViewModel @ViewModelInject constructor(
     private val _itemsToBuy = MutableLiveData<UiState<List<ItemToBuy>>>()
     val itemsToBuy: LiveData<UiState<List<ItemToBuy>>> = _itemsToBuy
 
-    private val _deletedItem = MutableLiveData<UiState<Nothing>>()
-    val deletedItem: LiveData<UiState<Nothing>> = _deletedItem
+//    private val _deletedItem = MutableLiveData<UiState<Nothing>>()
+//    val deletedItem: LiveData<UiState<Nothing>> = _deletedItem
+
+    private val _deletedItemChannel = Channel<UiState<Nothing>>()
+    val deletedItemChannelFlow = _deletedItemChannel.receiveAsFlow()
+
+    private val _updatedItem = MutableLiveData<UiState<Nothing>>()
+    val updatedItem: LiveData<UiState<Nothing>> = _updatedItem
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         _itemsToBuy.postValue(UiState.Error(throwable as Exception))
@@ -178,7 +184,7 @@ class DashboardViewModel @ViewModelInject constructor(
                         deleteItemFromLocalDb(itemToBuy)
                     }
                     is ApiResponse.Error -> {
-                        _deletedItem.postValue(UiState.Error(Exception("Ошибка удаления с сервера")))
+                        _deletedItemChannel.send(UiState.Error(Exception("Ошибка удаления с сервера!")))
                     }
                 }
             }
@@ -188,13 +194,26 @@ class DashboardViewModel @ViewModelInject constructor(
         }
     }
 
+    fun updateItem(itemToBuy: ItemToBuy){
+        viewModelScope.launch {
+            when(expensesRepository.getDaoSource().updateItemToBuy(itemToBuy)){
+                is DaoResponse.Success -> {
+                    _updatedItem.postValue(UiState.Success())
+                }
+                is DaoResponse.Error -> {
+                    _updatedItem.postValue(UiState.Error(Exception("Ошибка обновления данных!")))
+                }
+            }
+        }
+    }
+
     private suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){
         when(expensesRepository.getDaoSource().deleteItemToBuy(itemToBuy)){
             is DaoResponse.Success -> {
-                _deletedItem.postValue(UiState.Success())
+                _deletedItemChannel.send(UiState.Success())
             }
             is DaoResponse.Error -> {
-                _deletedItem.postValue(UiState.Error(Exception("Ошибка удаления из локальной бд")))
+                _deletedItemChannel.send(UiState.Error(Exception("Ошибка удаления из локальной бд!")))
             }
         }
     }

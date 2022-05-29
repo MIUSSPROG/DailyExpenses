@@ -8,7 +8,10 @@ import com.example.dailyexpenses.migrations.MigrationDeleteTableUser
 
 @Database(
     entities = [ItemToBuy::class, User::class],
-    version = 1,
+    version = 2,
+    autoMigrations = [
+        AutoMigration(from = 1, to = 2)
+    ]
 //    autoMigrations = [
 //        AutoMigration(from = 1, to = 2),
 //        AutoMigration(from = 2, to = 3),

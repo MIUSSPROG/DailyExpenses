@@ -1,11 +1,14 @@
 package com.example.dailyexpenses.ui.main.tabs.dashboard
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.*
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -22,6 +25,7 @@ import com.applandeo.materialcalendarview.listeners.OnCalendarPageChangeListener
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.data.ItemToBuy
 import com.example.dailyexpenses.data.ItemsToBuyAdapter
+import com.example.dailyexpenses.data.PhotoAttachmentActionListener
 import com.example.dailyexpenses.databinding.FragmentDashboardBinding
 import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.EXTRA_DATE_SELECTED
 import com.example.dailyexpenses.ui.main.tabs.dashboard.AddItemToBuyFragment.Companion.REQUEST_CODE
@@ -42,8 +46,32 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
     private var selectedDateUnix by Delegates.notNull<Long>()
     private var isCurMonth = true
     private var curMonth by Delegates.notNull<Int>()
-    private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter() }
+    private var selectedItemToBuy: ItemToBuy? = null
     private val viewModel: DashboardViewModel by viewModels()
+//    var resultLauncher = registerForActivityResult(GetContent()){
+//            Toast.makeText(requireContext(), it.toString(), Toast.LENGTH_SHORT).show()
+////            viewModel.updateItem()
+//    }
+    var resultLauncher = registerForActivityResult(StartActivityForResult()){
+        if (it.resultCode == RESULT_OK){
+            val data = it.data?.data
+            selectedItemToBuy?.let { it1 -> viewModel.updateItem(it1.copy(imageUri = data.toString())) }
+        }
+    }
+    private val itemsToBuyAdapter by lazy { ItemsToBuyAdapter(object:
+        PhotoAttachmentActionListener {
+        override fun attachPhoto(itemToBuy: ItemToBuy) {
+            selectedItemToBuy = itemToBuy
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            resultLauncher.launch(intent)
+        }
+
+        override fun detachPhoto(itemToBuy: ItemToBuy) {
+            viewModel.updateItem(itemToBuy.copy(imageUri = null))
+        }
+
+    }) }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -59,6 +87,17 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             viewModel.setCalendarEvents(curMonth)
             viewModel.calendarEvents.observe(viewLifecycleOwner) {
                 calendarViewPlan.setEvents(it)
+            }
+
+            viewModel.updatedItem.observe(viewLifecycleOwner){
+                when(it){
+                    is UiState.Success -> {
+                        Toast.makeText(requireContext(), "Успешно!", Toast.LENGTH_SHORT).show()
+                    }
+                    is UiState.Error -> {
+                        Toast.makeText(requireContext(), "Ошибка прикрепления/открепления фото!", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
 
             selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis + 24*60*60*1000)
@@ -117,7 +156,7 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
 
         viewModel.itemsToBuy.observe(viewLifecycleOwner) {
             when (it) {
-                is UiState.Success<*> -> {
+                is UiState.Success -> {
                     itemsToBuyAdapter.submitList(it.data as List<ItemToBuy>)
                     viewModel.setCalendarEvents(curMonth)
                 }
@@ -170,14 +209,18 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
             setHasFixedSize(true)
         }
 
-        viewModel.deletedItem.observe(viewLifecycleOwner){
-            when(it){
-                is UiState.Success<*> -> {
-                    Toast.makeText(requireContext(), "Элемент удален!", Toast.LENGTH_SHORT).show()
-                    viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
-                }
-                is UiState.Error -> {
-                    Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.deletedItemChannelFlow.collect {
+                    when(it){
+                        is UiState.Success -> {
+                            Toast.makeText(requireContext(), "Элемент удален!", Toast.LENGTH_SHORT).show()
+                            viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
+                        }
+                        is UiState.Error -> {
+                            Toast.makeText(requireContext(), "Ошибка!", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
             }
         }

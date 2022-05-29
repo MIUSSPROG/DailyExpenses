@@ -30,17 +30,6 @@ data class ItemToBuy(
     val confirm: Boolean?,
     val send: Boolean = false,
     val remoteDbId: Int? = null,
-    val userRemoteId: Int? = null
-//    val login: String? = null
-) {
-    fun convertToDbPlan(childId: Int)  =
-        Plan(
-            id = id,
-            name = name,
-            price = price,
-            date = date,
-            confirm = confirm,
-            categoryId = categoryId,
-            childId = childId
-        )
-}
+    val userRemoteId: Int? = null,
+    val imageUri: String? = null
+)

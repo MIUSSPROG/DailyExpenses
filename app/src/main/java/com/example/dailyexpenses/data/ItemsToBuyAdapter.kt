@@ -1,6 +1,7 @@
 package com.example.dailyexpenses.data
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -8,7 +9,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.dailyexpenses.R
 import com.example.dailyexpenses.databinding.RvDateItemBinding
 
-class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewHolder>(DiffCallback()) {
+interface PhotoAttachmentActionListener{
+    fun attachPhoto(itemToBuy: ItemToBuy)
+    fun detachPhoto(itemToBuy: ItemToBuy)
+}
+
+class ItemsToBuyAdapter(private val actionListener: PhotoAttachmentActionListener): ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewHolder>(DiffCallback()), View.OnClickListener {
 
     class ItemToBuyViewHolder(private val binding: RvDateItemBinding): RecyclerView.ViewHolder(binding.root){
         fun bind(itemToBuy: ItemToBuy){
@@ -16,8 +22,12 @@ class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewH
                 tvCategory.text = itemToBuy.category
                 tvDateItem.text = itemToBuy.name
                 tvDateItemPrice.text = itemToBuy.price.toString()
+                attachPhotoLayout.visibility = View.GONE
+                imgvAttachPhoto.tag = itemToBuy
+                imgvDetachPhoto.tag = itemToBuy
                 if (itemToBuy.confirm == true) {
                     imgvConfirmStatus.setImageResource(R.drawable.ic_done)
+                    attachPhotoLayout.visibility = View.VISIBLE
                 }
                 else if (itemToBuy.confirm == false){
                     imgvConfirmStatus.setImageResource(R.drawable.ic_cancel)
@@ -44,12 +54,26 @@ class ItemsToBuyAdapter: ListAdapter<ItemToBuy, ItemsToBuyAdapter.ItemToBuyViewH
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ItemToBuyViewHolder {
         val binding = RvDateItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        binding.imgvAttachPhoto.setOnClickListener(this)
+        binding.imgvDetachPhoto.setOnClickListener(this)
         return ItemToBuyViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: ItemToBuyViewHolder, position: Int) {
         val currentItem = getItem(position)
         holder.bind(currentItem)
+    }
+
+    override fun onClick(v: View) {
+        val itemToBuy = v.tag as ItemToBuy
+        when(v.id){
+            R.id.imgvAttachPhoto -> {
+                actionListener.attachPhoto(itemToBuy)
+            }
+            R.id.imgvDetachPhoto -> {
+                actionListener.detachPhoto(itemToBuy)
+            }
+        }
     }
 
 }
