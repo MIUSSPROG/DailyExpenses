@@ -24,7 +24,7 @@ data class Plan(
     override val image: String? = null,
     @SerializedName("db_id")
     val dbId: Int = -1
-) : PlanTemplate()
+): PlanTemplate()
 
 data class PlanRV(
     override val id: Int? = null,

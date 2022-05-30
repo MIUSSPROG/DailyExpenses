@@ -205,16 +205,17 @@ class DashboardViewModel @ViewModelInject constructor(
 
     fun updateItem(itemToBuy: ItemToBuy){
         viewModelScope.launch(exceptionSendImageHandler) {
-            val imagePart: MultipartBody.Part? = null
+            var imagePart: MultipartBody.Part? = null
             if (itemToBuy != null){
                 val file = File(itemToBuy.imageUri)
-                val imagePart = MultipartBody.Part.createFormData("image", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))
+                imagePart = MultipartBody.Part.createFormData("image", file.name, file.asRequestBody("image/*".toMediaTypeOrNull()))
 
             }
             coroutineScope {
                 expensesRepository.getDaoSource().updateItemToBuy(itemToBuy) }
                 expensesRepository.getRemoteDataSource().saveImageForPlan(itemToBuy.remoteDbId!!, imagePart)
             }
+        _updatedItem.postValue(UiState.Success())
         }
 
     private suspend fun deleteItemFromLocalDb(itemToBuy: ItemToBuy){

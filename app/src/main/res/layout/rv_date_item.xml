@@ -92,5 +92,16 @@
             app:layout_constraintStart_toEndOf="@+id/imgvAttachPhoto"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_remove_photo" />
+
+        <ImageView
+            android:id="@+id/imgvAttachedPhoto"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_gallery" />
     </androidx.constraintlayout.widget.ConstraintLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

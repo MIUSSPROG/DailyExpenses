@@ -25,7 +25,11 @@ class ItemsToBuyAdapter(private val actionListener: PhotoAttachmentActionListene
                 attachPhotoLayout.visibility = View.GONE
                 imgvAttachPhoto.tag = itemToBuy
                 imgvDetachPhoto.tag = itemToBuy
+                imgvAttachedPhoto.visibility = View.INVISIBLE
                 if (itemToBuy.confirm == true) {
+                    if (itemToBuy.imageUri != null){
+                        imgvAttachedPhoto.visibility = View.VISIBLE
+                    }
                     imgvConfirmStatus.setImageResource(R.drawable.ic_done)
                     attachPhotoLayout.visibility = View.VISIBLE
                 }

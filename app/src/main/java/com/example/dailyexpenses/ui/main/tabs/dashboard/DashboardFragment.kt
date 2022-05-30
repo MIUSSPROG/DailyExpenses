@@ -142,9 +142,12 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                 calendarViewPlan.setEvents(it)
             }
 
+            selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis + 24*60*60*1000)
+
             viewModel.updatedItem.observe(viewLifecycleOwner){
                 when(it){
                     is UiState.Success -> {
+                        viewModel.getItemsToBuy(selectedDateUnix)
                         Toast.makeText(requireContext(), "Успешно!", Toast.LENGTH_SHORT).show()
                     }
                     is UiState.Error -> {
@@ -152,8 +155,6 @@ class DashboardFragment : Fragment(R.layout.fragment_dashboard) {
                     }
                 }
             }
-
-            selectedDateUnix = convertMillisToDateMills(calendar.timeInMillis + 24*60*60*1000)
 
             viewModel.getItemsToBuy(pickedDate = selectedDateUnix)
 
