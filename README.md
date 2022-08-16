@@ -1,6 +1,8 @@
 # DailyExpenses Демонстрационное видео работы приложения
 
 
+крайняя ветка - attach_photo
+
 
 https://user-images.githubusercontent.com/84562458/184951939-d7580b0d-5742-4e72-96f6-9a064abed8e8.mp4
 
